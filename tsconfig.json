@@ -1,4 +1,8 @@
 {
-  "compilerOptions": { "jsx": "react-jsx", "typeRoots": ["src/types"] },
-  "include": ["src"]
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "typeRoots": ["./node_modules/@types", "./src/types"],
+    "lib": ["ES2015", "DOM"]
+  },
+  "include": ["src/**/*.ts"]
 }

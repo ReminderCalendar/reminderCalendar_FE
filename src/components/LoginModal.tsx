@@ -1,4 +1,8 @@
-import GoogleLogo from '../assets/googlelogo.png';
+import React from 'react';
+import KakaoLogo from '../assets/kakao_login_large_narrow.png';
+import GoogleLogo from '../assets/google_logo.png';
+import ReminderCalendarLogo from '../assets/reminder.png';
+import CloseIcon from '@mui/icons-material/Close';
 import {
   Box,
   Avatar,
@@ -7,31 +11,65 @@ import {
   DialogTitle,
   IconButton,
   DialogContent,
+  Link,
 } from '@mui/material';
 import styled from '@emotion/styled';
-import CloseIcon from '@mui/icons-material/Close';
-import ReminderCalendarLogo from '../assets/reminder.png';
+
 import { useRecoilState } from 'recoil';
 import { isModalOpenAtom } from '../recoil/login/loginModalAtoms';
+
+const CLIENT_ID = import.meta.env.REACT_APP_REST_API_KEY;
+const REDIRECT_URI = import.meta.env.REACT_APP_REDIRECT_URL;
+
+const KAKAO_AUTH_URL = `https://kauth.kakao.com/oauth/authorize?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=code`;
+
+const DialogBox = styled(Box)({
+  display: 'flex',
+  flexDirection: 'column',
+  justifyContent: 'center',
+  padding: '1.5rem',
+});
 
 const BtnBox = styled(Box)({
   display: 'flex',
   alignItems: 'center',
-  border: '1px solid grey',
-  width: '15rem',
-  height: '2rem',
-  borderRadius: '5rem',
-  padding: '0.5rem 1rem',
+  justifyContent: 'center',
+
+  width: '340px',
+  height: '55px',
+
+  border: '1px solid lightgrey',
+  borderRadius: '12px',
+
   cursor: 'pointer',
-  backgroundColor: '#ffffff',
-  ':hover': {
-    backgroundColor: 'lightgrey',
+
+  '&.google_login_btn': {
+    backgroundColor: '#ffffff',
+    marginTop: '1rem',
+
+    ':hover': {
+      border: '1.4px solid #4285F4',
+    },
+  },
+
+  '&.kakao_login_btn': {
+    backgroundImage: `url(${KakaoLogo})`,
+    backgroundSize: 'contain',
+    backgroundRepeat: 'no-repeat',
+    backgroundPosition: 'center',
+    backgroundColor: '#FEE500',
+
+    ':hover': {
+      border: '1.4px solid black',
+    },
   },
 });
 
 const SignText = styled(Typography)({
-  marginLeft: '1.5rem',
-  fontSize: '1rem',
+  fontSize: '17px',
+
+  alignItems: 'center',
+  marginLeft: '20px',
 });
 
 const LoginModal = () => {
@@ -48,41 +86,39 @@ const LoginModal = () => {
         style={{
           display: 'flex',
           backgroundColor: '#e5384f',
-          height: '3rem',
+          height: '3.5rem',
           width: '100%',
         }}
       >
         <IconButton
           onClick={() => setModalOpen(!isModalOpen)}
-          sx={{ margin: '0 0.4rem 0 auto' }}
+          sx={{
+            margin: '0 1rem 0 auto',
+          }}
         >
           <CloseIcon />
         </IconButton>
       </div>
 
-      <Box
+      <DialogBox
         sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          padding: '1.7rem',
-          backgroundColor: '#fffdfc',
+          backgroundColor: theme => theme.palette.primary.light,
         }}
       >
-        <IconButton
+        <Box
           sx={{
             display: 'flex',
-            margin: 'auto',
-            color: 'black',
+            justifyContent: 'center',
           }}
         >
-          <img src={ReminderCalendarLogo} width="45rem" height="45rem" />
-        </IconButton>
+          <img src={ReminderCalendarLogo} width="50px" height="50px" />
+        </Box>
         <DialogTitle
           variant="h5"
           sx={{
             display: 'flex',
             fontWeight: 'bold',
+            width: '340px',
           }}
         >
           Reminder Calendar에 오신 것을 환영합니다.
@@ -90,26 +126,34 @@ const LoginModal = () => {
         <DialogContent
           sx={{
             display: 'flex',
-            justifyContent: 'center',
-            marginTop: '5rem',
+            flexDirection: 'column',
+            alignItems: 'center',
+            marginTop: '4rem',
           }}
         >
-          <BtnBox>
+          <Link href={KAKAO_AUTH_URL}>
+            <BtnBox className="kakao_login_btn" />
+          </Link>
+
+          <BtnBox className="google_login_btn">
             <Avatar
               src={GoogleLogo}
-              sx={{ width: '1.5rem', height: '1.5rem' }}
+              sx={{
+                width: '22px',
+                height: '22px',
+              }}
             />
-            <SignText>Google 계정으로 계속하기</SignText>
+            <SignText>Login with Google</SignText>
           </BtnBox>
         </DialogContent>
-      </Box>
-      <div
+      </DialogBox>
+      {/* <div
         style={{
           backgroundColor: '#e5384f',
           height: '1.5rem',
           width: '100%',
         }}
-      ></div>
+      /> */}
     </Dialog>
   );
 };

@@ -1,3 +1,4 @@
+import React from 'react';
 import Router from './Router';
 import NavBar from './components/NavBar';
 import LoginModal from './components/LoginModal';
