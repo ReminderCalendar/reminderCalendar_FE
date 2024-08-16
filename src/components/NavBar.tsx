@@ -7,7 +7,7 @@ import {
   Button,
   IconButton,
 } from '@mui/material';
-import { ReminderLogo } from '../assets/reminder.png';
+import ReminderLogo from '../assets/reminder.png';
 import { useRecoilState } from 'recoil';
 import { isModalOpenAtom } from '../recoil/login/loginModalAtoms';
 
@@ -19,18 +19,24 @@ const NavBar = () => {
       sx={{
         position: 'fixed',
         flex: 'start-end',
+        backgroundColor: '#ffffff',
       }}
     >
       <Toolbar>
-        <Typography>ReminderCalendar</Typography>
+        <IconButton>
+          <img src={ReminderLogo} alt="Reminder Logo" width="28px" />
+        </IconButton>
+        <Typography color="primary.dark" fontWeight="500" fontSize="large">
+          ReminderCalendar
+        </Typography>
         <Box sx={{ marginLeft: 'auto' }}>
           <Button
-            sx={{ color: 'text.primary' }}
+            sx={{ color: 'black' }}
             onClick={() => setModalOpen(!isModalOpen)}
           >
             회원가입/로그인
           </Button>
-          <Button sx={{ color: 'text.primary' }}>My</Button>
+          <Button sx={{ color: 'black' }}>My</Button>
         </Box>
       </Toolbar>
     </AppBar>

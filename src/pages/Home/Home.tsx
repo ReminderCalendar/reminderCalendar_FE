@@ -1,5 +1,12 @@
+import React from 'react';
+import Redirection from '../Redirection/Redirection';
+
 const Home = () => {
-  return <></>;
+  return (
+    <>
+      <Redirection />
+    </>
+  );
 };
 
 export default Home;
