@@ -13,23 +13,13 @@ import {
 
 const Redirection = () => {
   const [nickNmaeModalOpen, setNickNmaeModalOpen] = useState(false);
-  const navigate = useNavigate();
   const code = new URL(window.location.href).searchParams.get('code');
 
   const kakaoLogin = async () => {
-    await axios({
-      method: 'GET',
-      url: `${import.meta.env.VITE_REACT_APP_REDIRECT_URL}/?code=${code}}`, //백으로 인가코드 보내는 주소
-      headers: {
-        'Content-Type': 'application/json;charset=utf-8',
-      },
-    }).then(res => {
-      console.log(res);
-
-      localStorage.setItem('name', res.data.account.kakaoName);
-
-      //navigate("/");
-    });
+    const res = await axios.get(
+      `http://13.209.245.142:8080/api/login/kakao?code=${code}`,
+    );
+    console.log(res);
   };
 
   useEffect(() => {
