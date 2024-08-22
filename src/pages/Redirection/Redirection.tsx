@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import React from 'react';
+import Reminder from '../../api/api';
 import {
   Dialog,
   DialogTitle,
@@ -8,55 +7,189 @@ import {
   DialogContentText,
   DialogActions,
   Button,
+  Box,
   TextField,
+  CircularProgress,
+  Typography,
+  InputAdornment,
+  styled,
 } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
+import { AccountBox, Email } from '@mui/icons-material';
+import { isEmailValid } from '../../util/validation';
 
 const Redirection = () => {
-  const [nickNmaeModalOpen, setNickNmaeModalOpen] = useState(false);
+  const navigate = useNavigate();
   const code = new URL(window.location.href).searchParams.get('code');
 
-  const kakaoLogin = async () => {
-    const res = await axios.get(
-      `http://13.209.245.142:8080/api/login/kakao?code=${code}`,
-    );
-    console.log(res);
+  const [nickNmaeModalOpen, setNickNmaeModalOpen] = React.useState(false);
+
+  const isMember = async () => {
+    try {
+      const { data } = await Reminder.get('/member');
+      localStorage.setItem('active', 'true');
+    } catch (err) {
+      localStorage.setItem('active', 'false');
+      setNickNmaeModalOpen(true);
+    }
   };
 
-  useEffect(() => {
-    kakaoLogin();
-  });
+  React.useEffect(() => {
+    const kakaoLogin = async () => {
+      try {
+        const { data } = await Reminder.get(`/login/kakao?code=${code}`);
+        localStorage.setItem('accessToken', data.accessToken);
 
-  const handleClose = () => {
-    setNickNmaeModalOpen(false);
+        //setNickNmaeModalOpen(true);
+        //navigate(-1);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    kakaoLogin();
+    isMember();
+  }, [code]);
+
+  const LoginProgress = () => {
+    return (
+      <Dialog open={true} maxWidth="xs" fullWidth>
+        <DialogContent
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            padding: '3rem 0',
+          }}
+        >
+          <CircularProgress
+            sx={{ color: theme => theme.palette.primary.dark }}
+          />
+          <Typography marginTop="1.5rem">로그인 중입니다.</Typography>
+        </DialogContent>
+      </Dialog>
+    );
   };
 
   const SetNickName = () => {
+    const [email, setEmail] = React.useState('');
+    const [nickname, setNickname] = React.useState<string>('');
+    const [isEmailsend, setEmailsend] = React.useState(false);
+
+    const handleSendEmail = () => {
+      if (isEmailValid(email)) {
+        try {
+          const { data } = Reminder.post('/email/code', { email });
+          setEmailsend(true);
+          console.log(data);
+        } catch (err) {
+          window.alert('이메일 발송에 실패했습니다.');
+        }
+      }
+    };
+
+    const handleClickCancel = () => {
+      setNickNmaeModalOpen(false);
+      navigate('/');
+    };
+
     return (
       <Dialog
         open={true}
-        sx={{ margin: '10rem' }}
+        maxWidth="xs"
         onClose={() => setNickNmaeModalOpen(false)}
       >
-        <DialogTitle>회원가입</DialogTitle>
+        <DialogTitle sx={{ fontWeight: 'bold', marginTop: '1rem' }}>
+          회원가입
+        </DialogTitle>
         <DialogContent>
           <DialogContentText>
-            웹사이트에 가입하려면, 이메일 인증을 진행해주세요.
+            웹사이트에 가입하려면, 닉네임 설정과 이메일 인증을 진행해주세요.
           </DialogContentText>
+          <Typography marginTop="1.5rem">NickName</Typography>
           <TextField
-            required
-            margin="dense"
-            id="name"
-            name="email"
-            label="Email Address"
-            type="email"
             fullWidth
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <AccountBox />
+                </InputAdornment>
+              ),
+            }}
             variant="standard"
-            sx={{ color: 'primary.dark' }}
           />
+          <Typography marginTop="2rem">Email</Typography>
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+            }}
+          >
+            <TextField
+              sx={{ width: '290px' }}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Email />
+                  </InputAdornment>
+                ),
+              }}
+              variant="standard"
+              placeholder="hgd@reminder.com"
+              value={email}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setEmail(e.target.value)
+              }
+            />
+            <Button
+              type="submit"
+              sx={{
+                color: 'white',
+                backgroundColor: theme => theme.palette.primary.dark,
+                ':hover': { backgroundColor: 'primary.light' },
+              }}
+              onClick={handleSendEmail}
+            >
+              이메일 인증
+            </Button>
+          </Box>
+          {!isEmailValid(email) && email !== '' && (
+            <Typography variant="caption" color="error">
+              영문 소문자, 숫자와 특수기호(_),(-)만 사용 가능합니다.
+            </Typography>
+          )}
+          {isEmailsend && (
+            <>
+              <Typography className="authentication-code" marginTop="1rem">
+                인증코드
+              </Typography>
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                }}
+              >
+                <TextField sx={{ width: '290px' }} variant="standard" />
+                <Typography mx="0.7rem">2:50</Typography>
+                <Button
+                  type="submit"
+                  sx={{
+                    color: 'white',
+                    backgroundColor: theme => theme.palette.primary.dark,
+                    ':hover': { backgroundColor: 'primary.light' },
+                  }}
+                  onClick={handleSendEmail}
+                >
+                  확인
+                </Button>
+              </Box>
+            </>
+          )}
         </DialogContent>
-        <DialogActions>
+        <DialogActions sx={{ padding: '1.5rem' }}>
           <Button
-            onClick={handleClose}
+            onClick={handleClickCancel}
             variant="contained"
             sx={{
               color: 'white',
@@ -66,15 +199,8 @@ const Redirection = () => {
           >
             취소
           </Button>
-          <Button
-            type="submit"
-            sx={{
-              color: 'white',
-              backgroundColor: 'primary.dark',
-              ':hover': { backgroundColor: 'primary.light' },
-            }}
-          >
-            이메일 인증
+          <Button type="submit" variant="contained" color="success">
+            가입
           </Button>
         </DialogActions>
       </Dialog>
@@ -82,10 +208,10 @@ const Redirection = () => {
   };
 
   return (
-    <div>
-      <p>로그인 중입니다.</p>
+    <>
+      {localStorage.getItem('active') === null && <LoginProgress />}
       {nickNmaeModalOpen && <SetNickName />}
-    </div>
+    </>
   );
 };
 
