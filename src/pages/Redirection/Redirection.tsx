@@ -38,6 +38,7 @@ const Redirection = () => {
       try {
         const { data } = await Reminder.get(`/login/kakao?code=${code}`);
         localStorage.setItem('accessToken', data.accessToken);
+        isMember();
       } catch (err) {
         console.error(err);
       }
@@ -47,6 +48,7 @@ const Redirection = () => {
       try {
         const { data } = await Reminder.get(`/login/google?code=${code}`);
         localStorage.setItem('accessToken', data.accessToken);
+        isMember();
       } catch (err) {
         console.log(err);
       }
@@ -57,7 +59,6 @@ const Redirection = () => {
     } else if (window.location.href.includes('google')) {
       googleLogin();
     }
-    isMember();
   }, [code]);
 
   const LoginProgress = () => {
