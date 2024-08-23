@@ -12,7 +12,6 @@ import {
   CircularProgress,
   Typography,
   InputAdornment,
-  styled,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { AccountBox, Email } from '@mui/icons-material';
@@ -39,15 +38,25 @@ const Redirection = () => {
       try {
         const { data } = await Reminder.get(`/login/kakao?code=${code}`);
         localStorage.setItem('accessToken', data.accessToken);
+      } catch (err) {
+        console.error(err);
+      }
+    };
 
-        //setNickNmaeModalOpen(true);
-        //navigate(-1);
+    const googleLogin = async () => {
+      try {
+        const { data } = await Reminder.get(`/login/google?code=${code}`);
+        localStorage.setItem('accessToken', data.accessToken);
       } catch (err) {
         console.log(err);
       }
     };
 
-    kakaoLogin();
+    if (window.location.href.includes('kakao')) {
+      kakaoLogin();
+    } else if (window.location.href.includes('google')) {
+      googleLogin();
+    }
     isMember();
   }, [code]);
 

@@ -22,6 +22,7 @@ const NavBar = () => {
         position: 'fixed',
         flex: 'start-end',
         backgroundColor: '#ffffff',
+        zIndex: -1,
       }}
     >
       <Toolbar>

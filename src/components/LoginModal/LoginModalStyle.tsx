@@ -44,6 +44,7 @@ export const BtnBox = styled(Box)({
 });
 
 export const SignText = styled(Typography)({
+  color: 'black',
   fontSize: '17px',
 
   alignItems: 'center',

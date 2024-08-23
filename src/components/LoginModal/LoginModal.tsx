@@ -13,6 +13,7 @@ import {
 } from '@mui/material';
 import { DialogBox, BtnBox, SignText } from './LoginModalStyle';
 import { KAKAO_AUTH_URL } from '../../util/getAuthorizationCode';
+import { GOOGLE_AUTH_URL } from '../../util/getAuthorizationCode';
 import { useRecoilState } from 'recoil';
 import { isModalOpenAtom } from '../../recoil/login/loginModalAtoms';
 
@@ -78,26 +79,20 @@ const LoginModal = () => {
           <Link href={KAKAO_AUTH_URL}>
             <BtnBox className="kakao_login_btn" />
           </Link>
-
-          <BtnBox className="google_login_btn">
-            <Avatar
-              src={GoogleLogo}
-              sx={{
-                width: '22px',
-                height: '22px',
-              }}
-            />
-            <SignText>Login with Google</SignText>
-          </BtnBox>
+          <Link href={GOOGLE_AUTH_URL}>
+            <BtnBox className="google_login_btn">
+              <Avatar
+                src={GoogleLogo}
+                sx={{
+                  width: '22px',
+                  height: '22px',
+                }}
+              />
+              <SignText>Login with Google</SignText>
+            </BtnBox>
+          </Link>
         </DialogContent>
       </DialogBox>
-      {/* <div
-        style={{
-          backgroundColor: '#e5384f',
-          height: '1.5rem',
-          width: '100%',
-        }}
-      /> */}
     </Dialog>
   );
 };
