@@ -19,7 +19,6 @@ const NavBar = () => {
   return (
     <AppBar
       sx={{
-        position: 'fixed',
         flex: 'start-end',
         backgroundColor: '#ffffff',
         zIndex: -1,
