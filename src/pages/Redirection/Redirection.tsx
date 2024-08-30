@@ -27,6 +27,7 @@ const Redirection = () => {
     try {
       const { data } = await Reminder.get('/member');
       localStorage.setItem('active', 'true');
+      console.log(data);
     } catch (err) {
       localStorage.setItem('active', 'false');
       setNickNmaeModalOpen(true);
@@ -83,13 +84,13 @@ const Redirection = () => {
 
   const SetNickName = () => {
     const [email, setEmail] = React.useState('');
-    const [nickname, setNickname] = React.useState<string>('');
+    //const [nickname, setNickname] = React.useState<string>('');
     const [isEmailsend, setEmailsend] = React.useState(false);
 
-    const handleSendEmail = () => {
+    const handleSendEmail = async () => {
       if (isEmailValid(email)) {
         try {
-          const { data } = Reminder.post('/email/code', { email });
+          const { data } = await Reminder.post('/email/code', { email });
           setEmailsend(true);
           console.log(data);
         } catch (err) {
