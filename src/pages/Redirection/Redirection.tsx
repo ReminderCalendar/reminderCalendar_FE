@@ -16,6 +16,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { AccountBox, Email } from '@mui/icons-material';
 import { isEmailValid } from '../../util/validation';
+import axios from 'axios';
 
 const Redirection = () => {
   const navigate = useNavigate();
@@ -82,15 +83,23 @@ const Redirection = () => {
     );
   };
 
-  const SetNickName = () => {
+  const AddMemberInfo = () => {
     const [email, setEmail] = React.useState('');
-    //const [nickname, setNickname] = React.useState<string>('');
+    const [nickname, setNickname] = React.useState('');
     const [isEmailsend, setEmailsend] = React.useState(false);
 
     const handleSendEmail = async () => {
       if (isEmailValid(email)) {
         try {
-          const { data } = await Reminder.post('/email/code', { email });
+          const { data } = await axios.post(
+            'http://13.209.245.142:8080/api/email/code',
+            { email },
+            {
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+              },
+            },
+          );
           setEmailsend(true);
           console.log(data);
         } catch (err) {
@@ -102,6 +111,14 @@ const Redirection = () => {
     const handleClickCancel = () => {
       setNickNmaeModalOpen(false);
       navigate('/');
+    };
+
+    const handleSubmit = async () => {
+      const { data } = await Reminder.post('/email/activate', {
+        email,
+        username: nickname,
+      });
+      console.log(data);
     };
 
     return (
@@ -128,6 +145,10 @@ const Redirection = () => {
               ),
             }}
             variant="standard"
+            value={nickname}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setNickname(e.target.value)
+            }
           />
           <Typography marginTop="2rem">Email</Typography>
           <Box
@@ -210,7 +231,12 @@ const Redirection = () => {
           >
             취소
           </Button>
-          <Button type="submit" variant="contained" color="success">
+          <Button
+            type="submit"
+            variant="contained"
+            color="success"
+            onClick={handleSubmit}
+          >
             가입
           </Button>
         </DialogActions>
@@ -221,7 +247,7 @@ const Redirection = () => {
   return (
     <>
       {localStorage.getItem('active') === null && <LoginProgress />}
-      {nickNmaeModalOpen && <SetNickName />}
+      {nickNmaeModalOpen && <AddMemberInfo />}
     </>
   );
 };

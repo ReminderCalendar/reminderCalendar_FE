@@ -66,7 +66,7 @@ const WeeklySchedule = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {time.map((hour, _) => {
+            {time.map(hour => {
               return (
                 <TableRow>
                   {week.map((day, i) => {
