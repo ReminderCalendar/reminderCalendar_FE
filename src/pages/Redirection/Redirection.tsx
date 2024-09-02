@@ -88,25 +88,14 @@ const Redirection = () => {
     const [nickname, setNickname] = React.useState('');
     const [verificationNum, setVerificationNum] = React.useState('');
     const [isEmailsend, setEmailsend] = React.useState(false);
+    const [isVerificationCodeCorrect, setVerificationCodeCorrect] =
+      React.useState(false);
 
     const handleSendEmail = async () => {
       if (isEmailValid(email)) {
         try {
-          const formData = new FormData();
-          formData.append('email', email);
-
-          const { data } = await axios.post(
-            'http://13.209.245.142:8080/api/email/code',
-            { email },
-            {
-              headers: {
-                Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
-                'Content-Type': 'multipart/form-data',
-              },
-            },
-          );
+          await Reminder.post('/email/code', { email });
           setEmailsend(true);
-          console.log(data);
         } catch (err) {
           window.alert('이메일 발송에 실패했습니다.');
         }
@@ -118,7 +107,17 @@ const Redirection = () => {
       navigate('/');
     };
 
-    const handleCheckCorrect = () => {};
+    const handleCheckCorrect = async () => {
+      if (verificationNum === '') {
+        return;
+      }
+      try {
+        await Reminder.get(`/email/verify?verificationCode=${verificationNum}`);
+        setVerificationCodeCorrect(true);
+      } catch (err) {
+        window.alert('인증번호가 일치하지 않습니다.');
+      }
+    };
 
     const handleSubmit = async () => {
       const { data } = await Reminder.post('/email/activate', {
@@ -185,7 +184,7 @@ const Redirection = () => {
               }}
               onClick={handleSendEmail}
             >
-              이메일 인증
+              {isEmailsend ? '재전송' : '이메일 인증'}
             </Button>
           </Box>
           {!isEmailValid(email) && email !== '' && (
@@ -207,7 +206,6 @@ const Redirection = () => {
               >
                 <TextField
                   sx={{ width: '290px' }}
-                  type="number"
                   variant="standard"
                   value={verificationNum}
                   onChange={e => setVerificationNum(e.target.value)}
