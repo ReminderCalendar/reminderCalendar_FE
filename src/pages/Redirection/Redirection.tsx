@@ -51,7 +51,7 @@ const Redirection = () => {
         localStorage.setItem('accessToken', data.accessToken);
         isMember();
       } catch (err) {
-        console.log(err);
+        console.error(err);
       }
     };
 
@@ -82,17 +82,18 @@ const Redirection = () => {
     );
   };
 
-  const SetNickName = () => {
+  const AddMemberInfo = () => {
     const [email, setEmail] = React.useState('');
-    //const [nickname, setNickname] = React.useState<string>('');
+    const [nickname, setNickname] = React.useState('');
+    const [verificationNum, setVerificationNum] = React.useState('');
     const [isEmailsend, setEmailsend] = React.useState(false);
+    //const [isVerificationCodeCorrect, setVerificationCodeCorrect] = React.useState(false);
 
     const handleSendEmail = async () => {
       if (isEmailValid(email)) {
         try {
-          const { data } = await Reminder.post('/email/code', { email });
+          await Reminder.post('/email/code', { email });
           setEmailsend(true);
-          console.log(data);
         } catch (err) {
           window.alert('이메일 발송에 실패했습니다.');
         }
@@ -102,6 +103,26 @@ const Redirection = () => {
     const handleClickCancel = () => {
       setNickNmaeModalOpen(false);
       navigate('/');
+    };
+
+    const handleCheckCorrect = async () => {
+      if (verificationNum === '') {
+        return;
+      }
+      try {
+        await Reminder.get(`/email/verify?verificationCode=${verificationNum}`);
+        //setVerificationCodeCorrect(true);
+      } catch (err) {
+        window.alert('인증번호가 일치하지 않습니다.');
+      }
+    };
+
+    const handleSubmit = async () => {
+      const { data } = await Reminder.post('/email/activate', {
+        email,
+        username: nickname,
+      });
+      console.log(data);
     };
 
     return (
@@ -128,6 +149,8 @@ const Redirection = () => {
               ),
             }}
             variant="standard"
+            value={nickname}
+            onChange={e => setNickname(e.target.value)}
           />
           <Typography marginTop="2rem">Email</Typography>
           <Box
@@ -148,9 +171,7 @@ const Redirection = () => {
               variant="standard"
               placeholder="hgd@reminder.com"
               value={email}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setEmail(e.target.value)
-              }
+              onChange={e => setEmail(e.target.value)}
             />
             <Button
               type="submit"
@@ -161,7 +182,7 @@ const Redirection = () => {
               }}
               onClick={handleSendEmail}
             >
-              이메일 인증
+              {isEmailsend ? '재전송' : '이메일 인증'}
             </Button>
           </Box>
           {!isEmailValid(email) && email !== '' && (
@@ -181,7 +202,12 @@ const Redirection = () => {
                   alignItems: 'center',
                 }}
               >
-                <TextField sx={{ width: '290px' }} variant="standard" />
+                <TextField
+                  sx={{ width: '290px' }}
+                  variant="standard"
+                  value={verificationNum}
+                  onChange={e => setVerificationNum(e.target.value)}
+                />
                 <Typography mx="0.7rem">2:50</Typography>
                 <Button
                   type="submit"
@@ -190,7 +216,7 @@ const Redirection = () => {
                     backgroundColor: theme => theme.palette.primary.dark,
                     ':hover': { backgroundColor: 'primary.light' },
                   }}
-                  onClick={handleSendEmail}
+                  onClick={handleCheckCorrect}
                 >
                   확인
                 </Button>
@@ -210,7 +236,12 @@ const Redirection = () => {
           >
             취소
           </Button>
-          <Button type="submit" variant="contained" color="success">
+          <Button
+            type="submit"
+            variant="contained"
+            color="success"
+            onClick={handleSubmit}
+          >
             가입
           </Button>
         </DialogActions>
@@ -221,7 +252,7 @@ const Redirection = () => {
   return (
     <>
       {localStorage.getItem('active') === null && <LoginProgress />}
-      {nickNmaeModalOpen && <SetNickName />}
+      {nickNmaeModalOpen && <AddMemberInfo />}
     </>
   );
 };
