@@ -52,7 +52,7 @@ const Redirection = () => {
         localStorage.setItem('accessToken', data.accessToken);
         isMember();
       } catch (err) {
-        console.log(err);
+        console.error(err);
       }
     };
 
@@ -86,17 +86,22 @@ const Redirection = () => {
   const AddMemberInfo = () => {
     const [email, setEmail] = React.useState('');
     const [nickname, setNickname] = React.useState('');
+    const [verificationNum, setVerificationNum] = React.useState('');
     const [isEmailsend, setEmailsend] = React.useState(false);
 
     const handleSendEmail = async () => {
       if (isEmailValid(email)) {
         try {
+          const formData = new FormData();
+          formData.append('email', email);
+
           const { data } = await axios.post(
             'http://13.209.245.142:8080/api/email/code',
             { email },
             {
               headers: {
                 Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+                'Content-Type': 'multipart/form-data',
               },
             },
           );
@@ -112,6 +117,8 @@ const Redirection = () => {
       setNickNmaeModalOpen(false);
       navigate('/');
     };
+
+    const handleCheckCorrect = () => {};
 
     const handleSubmit = async () => {
       const { data } = await Reminder.post('/email/activate', {
@@ -146,9 +153,7 @@ const Redirection = () => {
             }}
             variant="standard"
             value={nickname}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              setNickname(e.target.value)
-            }
+            onChange={e => setNickname(e.target.value)}
           />
           <Typography marginTop="2rem">Email</Typography>
           <Box
@@ -169,9 +174,7 @@ const Redirection = () => {
               variant="standard"
               placeholder="hgd@reminder.com"
               value={email}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setEmail(e.target.value)
-              }
+              onChange={e => setEmail(e.target.value)}
             />
             <Button
               type="submit"
@@ -202,7 +205,13 @@ const Redirection = () => {
                   alignItems: 'center',
                 }}
               >
-                <TextField sx={{ width: '290px' }} variant="standard" />
+                <TextField
+                  sx={{ width: '290px' }}
+                  type="number"
+                  variant="standard"
+                  value={verificationNum}
+                  onChange={e => setVerificationNum(e.target.value)}
+                />
                 <Typography mx="0.7rem">2:50</Typography>
                 <Button
                   type="submit"
@@ -211,7 +220,7 @@ const Redirection = () => {
                     backgroundColor: theme => theme.palette.primary.dark,
                     ':hover': { backgroundColor: 'primary.light' },
                   }}
-                  onClick={handleSendEmail}
+                  onClick={handleCheckCorrect}
                 >
                   확인
                 </Button>
