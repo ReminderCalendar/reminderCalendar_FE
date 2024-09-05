@@ -27,7 +27,6 @@ const AddEventDialog = ({
   addEventDialogOpen,
   setAddEventDialogOpen,
 }: AddEventDialogProps) => {
-  //   return <Box sx={{ display: addEventDialogOpen ? 'block' : 'none' }}>box</Box>;
   return (
     <Dialog
       open={addEventDialogOpen}
@@ -35,30 +34,60 @@ const AddEventDialog = ({
       maxWidth="xs"
       fullWidth
     >
-      <DialogActions>
-        <IconButton sx={{ marginLeft: 'auto' }}>
-          <CloseIcon />
-        </IconButton>
-      </DialogActions>
-
+      <IconButton
+        sx={{ marginLeft: 'auto' }}
+        onClick={() => setAddEventDialogOpen(false)}
+      >
+        <CloseIcon />
+      </IconButton>
       <DialogContent sx={{ display: 'flex', flexDirection: 'column' }}>
-        <Input placeholder="제목 추가" />
+        <Input
+          placeholder="제목 추가"
+          sx={{ fontSize: '18px', fontWeight: 'bold' }}
+        />
         <LocalizationProvider dateAdapter={AdapterDayjs}>
-          <DatePicker sx={{ width: '180px', marginTop: '20px' }} />
+          <Stack
+            sx={{
+              display: 'flex',
+              flexDirection: 'row',
+              alignItems: 'center',
+              marginTop: '20px',
+            }}
+          >
+            <Typography marginRight="10px">날짜:</Typography>
+            <DatePicker
+              sx={{
+                width: '180px',
+                '& .MuiOutlinedInput-root': { height: '45px' },
+              }}
+            />
+          </Stack>
           <DemoContainer components={['TimePicker', 'TimePicker']}>
-            <Stack display="flex" flexDirection="row" alignItems="center">
+            <Stack
+              display="flex"
+              flexDirection="row"
+              alignItems="center"
+              height="60px"
+            >
+              <Typography marginRight="10px">시간:</Typography>
               <TimePicker
                 defaultValue={dayjs()}
                 format="hh:mm"
-                sx={{ width: '130px' }}
+                sx={{
+                  width: '110px',
+                  '& .MuiOutlinedInput-root': { height: '50px' },
+                }}
               />
-              <Typography margin="0 20px" fontSize="50px" fontWeight="100">
+              <Typography margin="0 10px" fontSize="30px" fontWeight="300">
                 -
               </Typography>
               <TimePicker
                 defaultValue={dayjs()}
                 format="hh:mm"
-                sx={{ width: '130px' }}
+                sx={{
+                  width: '110px',
+                  '& .MuiOutlinedInput-root': { height: '50px' },
+                }}
               />
             </Stack>
           </DemoContainer>
