@@ -16,7 +16,6 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { AccountBox, Email } from '@mui/icons-material';
 import { isEmailValid } from '../../util/validation';
-import axios from 'axios';
 
 const Redirection = () => {
   const navigate = useNavigate();
@@ -88,8 +87,7 @@ const Redirection = () => {
     const [nickname, setNickname] = React.useState('');
     const [verificationNum, setVerificationNum] = React.useState('');
     const [isEmailsend, setEmailsend] = React.useState(false);
-    const [isVerificationCodeCorrect, setVerificationCodeCorrect] =
-      React.useState(false);
+    //const [isVerificationCodeCorrect, setVerificationCodeCorrect] = React.useState(false);
 
     const handleSendEmail = async () => {
       if (isEmailValid(email)) {
@@ -113,7 +111,7 @@ const Redirection = () => {
       }
       try {
         await Reminder.get(`/email/verify?verificationCode=${verificationNum}`);
-        setVerificationCodeCorrect(true);
+        //setVerificationCodeCorrect(true);
       } catch (err) {
         window.alert('인증번호가 일치하지 않습니다.');
       }

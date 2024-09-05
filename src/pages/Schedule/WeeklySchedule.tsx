@@ -30,6 +30,12 @@ const WeeklySchedule = () => {
         overflowY: 'scroll',
       }}
     >
+      {addEventDialogOpen && (
+        <AddEventDialog
+          addEventDialogOpen={addEventDialogOpen}
+          setAddEventDialogOpen={setAddEventDialogOpen}
+        />
+      )}
       <Table stickyHeader>
         <TableHead>
           <TableRow>
@@ -89,12 +95,6 @@ const WeeklySchedule = () => {
                         },
                       }}
                     >
-                      {addEventDialogOpen && (
-                        <AddEventDialog
-                          addEventDialogOpen={addEventDialogOpen}
-                          setAddEventDialogOpen={setAddEventDialogOpen}
-                        />
-                      )}
                       {i === 0 && (
                         <Box
                           sx={{
