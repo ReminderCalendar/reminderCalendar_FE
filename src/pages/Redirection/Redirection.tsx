@@ -87,7 +87,8 @@ const Redirection = () => {
     const [nickname, setNickname] = React.useState('');
     const [verificationNum, setVerificationNum] = React.useState('');
     const [isEmailsend, setEmailsend] = React.useState(false);
-    //const [isVerificationCodeCorrect, setVerificationCodeCorrect] = React.useState(false);
+    //const [isVerificationCodeCorrect, setVerificationCodeCorrect] =
+    React.useState(false);
 
     const handleSendEmail = async () => {
       if (isEmailValid(email)) {
@@ -110,19 +111,25 @@ const Redirection = () => {
         return;
       }
       try {
-        await Reminder.get(`/email/verify?verificationCode=${verificationNum}`);
+        await Reminder.post('/email/verify', {
+          verificationCode: verificationNum,
+        });
+        window.alert('인증에 성공하셨습니다!');
         //setVerificationCodeCorrect(true);
+        //가입 버튼 활성화/비활성화 설정
       } catch (err) {
         window.alert('인증번호가 일치하지 않습니다.');
       }
     };
 
     const handleSubmit = async () => {
-      const { data } = await Reminder.post('/email/activate', {
+      await Reminder.post('/email/activate', {
         email,
         username: nickname,
+        verificationCode: verificationNum,
       });
-      console.log(data);
+      window.alert('Reminder Calendar에 오신 것을 환영합니다 :)');
+      navigate('/');
     };
 
     return (
