@@ -14,6 +14,7 @@ module.exports = {
     'no-unused-vars': 'error',
     'no-multiple-empty-lines': 'error',
     eqeqeq: 'error',
+    'react/react-in-jsx-scope': 'off',
     'react-refresh/only-export-components': [
       'warn',
       { allowConstantExport: true },
