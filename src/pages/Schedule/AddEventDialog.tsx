@@ -6,6 +6,9 @@ import {
   IconButton,
   Stack,
   Typography,
+  FormControlLabel,
+  Checkbox,
+  TextField,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import dayjs from 'dayjs';
@@ -26,6 +29,8 @@ const AddEventDialog = ({
   addEventDialogOpen,
   setAddEventDialogOpen,
 }: AddEventDialogProps) => {
+  const [isAlldayChecked, setAlldayChecked] = React.useState<boolean>(false);
+
   return (
     <Dialog
       open={addEventDialogOpen}
@@ -57,7 +62,7 @@ const AddEventDialog = ({
             <DatePicker
               sx={{
                 width: '180px',
-                '& .MuiOutlinedInput-root': { height: '45px' },
+                '& .MuiOutlinedInput-root': { height: '40px' },
               }}
             />
           </Stack>
@@ -73,24 +78,53 @@ const AddEventDialog = ({
                 defaultValue={dayjs()}
                 format="hh:mm"
                 sx={{
-                  width: '110px',
-                  '& .MuiOutlinedInput-root': { height: '50px' },
+                  width: '105px',
+                  '& .MuiOutlinedInput-root': { height: '40px' },
                 }}
+                disabled={isAlldayChecked}
               />
-              <Typography margin="0 10px" fontSize="30px" fontWeight="300">
+              <Typography margin="0 8px" fontSize="30px" fontWeight="300">
                 -
               </Typography>
               <TimePicker
                 defaultValue={dayjs()}
                 format="hh:mm"
                 sx={{
-                  width: '110px',
-                  '& .MuiOutlinedInput-root': { height: '50px' },
+                  width: '105px',
+                  '& .MuiOutlinedInput-root': { height: '40px' },
+                  marginRight: '20px',
                 }}
+                disabled={isAlldayChecked}
+              />
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={isAlldayChecked}
+                    onChange={() => setAlldayChecked(!isAlldayChecked)}
+                    sx={{
+                      '& .MuiSvgIcon-root': {
+                        color: theme => theme.palette.primary.dark,
+                      },
+                      '&.MuiCheckbox-root': {
+                        padding: 0.5,
+                      },
+                    }}
+                  />
+                }
+                label="종일"
               />
             </Stack>
           </DemoContainer>
         </LocalizationProvider>
+        <TextField
+          id="standard-textarea"
+          label="내용 추가"
+          placeholder="Placeholder"
+          multiline
+          rows={4}
+          variant="outlined"
+          sx={{ marginTop: '10px' }}
+        />
       </DialogContent>
     </Dialog>
   );

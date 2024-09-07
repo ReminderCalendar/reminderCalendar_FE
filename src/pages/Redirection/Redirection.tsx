@@ -27,7 +27,9 @@ const Redirection = () => {
     try {
       const { data } = await Reminder.get('/member');
       localStorage.setItem('active', 'true');
-      console.log(data);
+      if (data.active === 'true') {
+        setNickNmaeModalOpen(true);
+      }
     } catch (err) {
       localStorage.setItem('active', 'false');
       setNickNmaeModalOpen(true);
