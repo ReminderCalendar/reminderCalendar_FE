@@ -4,7 +4,7 @@ import { REMINDER } from './BASEURL';
 const instance = axios.create({
   baseURL: REMINDER,
   headers: {
-    'Content-Type': 'application/json',
+    'Content-Type': 'multipart/form-data',
   },
 });
 

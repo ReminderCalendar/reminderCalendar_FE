@@ -12,13 +12,28 @@ import {
 import AddEventDialog from './AddEventDialog';
 import moment from 'moment';
 import 'moment/locale/ko';
+import Reminder from '../../api/api';
 
 const week = ['월', '화', '수', '목', '금', '토', '일'];
 const time = Array.from({ length: 24 }, (_, i) => i);
 
 const WeeklySchedule = () => {
   const [addEventDialogOpen, setAddEventDialogOpen] = React.useState(false);
+  const [allEvents, setAllEvents] = React.useState();
 
+  React.useEffect(() => {
+    const getEvents = async () => {
+      try {
+        const { data } = await Reminder.get('/events');
+        setAllEvents(data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    getEvents();
+  }, []);
+
+  //console.log(allEvents);
   return (
     <TableContainer
       sx={{
