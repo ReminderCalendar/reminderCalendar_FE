@@ -9,7 +9,6 @@ import {
   Button,
   Box,
   TextField,
-  CircularProgress,
   Typography,
   InputAdornment,
 } from '@mui/material';
@@ -21,20 +20,21 @@ const Redirection = () => {
   const navigate = useNavigate();
   const code = new URL(window.location.href).searchParams.get('code');
 
-  const [nickNmaeModalOpen, setNickNmaeModalOpen] = React.useState(false);
-
-  const isMember = async () => {
-    try {
-      const { data } = await Reminder.get('/member');
-      localStorage.setItem('active', 'true');
-      console.log(data);
-    } catch (err) {
-      localStorage.setItem('active', 'false');
-      setNickNmaeModalOpen(true);
-    }
-  };
+  const [nickNameModalOpen, setNickNameModalOpen] = React.useState(false);
 
   React.useEffect(() => {
+    const isMember = async () => {
+      try {
+        const { data } = await Reminder.get('/member');
+        localStorage.setItem('active', 'true');
+        console.log(data);
+        navigate('/');
+      } catch (err) {
+        localStorage.setItem('active', 'false');
+        setNickNameModalOpen(true);
+      }
+    };
+
     const kakaoLogin = async () => {
       try {
         const { data } = await Reminder.get(`/login/kakao?code=${code}`);
@@ -60,40 +60,39 @@ const Redirection = () => {
     } else if (window.location.href.includes('google')) {
       googleLogin();
     }
-  }, [code]);
+  }, [code, navigate]);
 
-  const LoginProgress = () => {
-    return (
-      <Dialog open={true} maxWidth="xs" fullWidth>
-        <DialogContent
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            padding: '3rem 0',
-          }}
-        >
-          <CircularProgress
-            sx={{ color: theme => theme.palette.primary.dark }}
-          />
-          <Typography marginTop="1.5rem">로그인 중입니다.</Typography>
-        </DialogContent>
-      </Dialog>
-    );
-  };
+  // const LoginProgress = () => {
+  //   return (
+  //     <Dialog open={true} maxWidth="xs" fullWidth>
+  //       <DialogContent
+  //         sx={{
+  //           display: 'flex',
+  //           flexDirection: 'column',
+  //           alignItems: 'center',
+  //           padding: '3rem 0',
+  //         }}
+  //       >
+  //         <CircularProgress
+  //           sx={{ color: theme => theme.palette.primary.dark }}
+  //         />
+  //         <Typography marginTop="1.5rem">로그인 중입니다.</Typography>
+  //       </DialogContent>
+  //     </Dialog>
+  //   );
+  // };
 
   const AddMemberInfo = () => {
     const [email, setEmail] = React.useState('');
     const [nickname, setNickname] = React.useState('');
     const [verificationNum, setVerificationNum] = React.useState('');
     const [isEmailsend, setEmailsend] = React.useState(false);
-    //const [isVerificationCodeCorrect, setVerificationCodeCorrect] = React.useState(false);
 
     const handleSendEmail = async () => {
       if (isEmailValid(email)) {
+        setEmailsend(true);
         try {
           await Reminder.post('/email/code', { email });
-          setEmailsend(true);
         } catch (err) {
           window.alert('이메일 발송에 실패했습니다.');
         }
@@ -101,35 +100,43 @@ const Redirection = () => {
     };
 
     const handleClickCancel = () => {
-      setNickNmaeModalOpen(false);
+      setNickNameModalOpen(false);
       navigate('/');
     };
 
     const handleCheckCorrect = async () => {
       if (verificationNum === '') {
+        window.alert('인증번호를 입력해주세요.');
         return;
       }
       try {
         await Reminder.get(`/email/verify?verificationCode=${verificationNum}`);
-        //setVerificationCodeCorrect(true);
+        window.alert('인증번호가 일치합니다! 회원가입을 진행해주세요:)');
+        setEmailsend(false);
       } catch (err) {
         window.alert('인증번호가 일치하지 않습니다.');
       }
     };
 
     const handleSubmit = async () => {
-      const { data } = await Reminder.post('/email/activate', {
-        email,
-        username: nickname,
-      });
-      console.log(data);
+      try {
+        await Reminder.post('/email/activate', {
+          email,
+          username: nickname,
+          verificationCode: verificationNum,
+        });
+        localStorage.setItem('active', 'true');
+        navigate('/');
+      } catch (err) {
+        window.alert('회원가입에 실패하였습니다. 다시 진행해주세요.');
+      }
     };
 
     return (
       <Dialog
         open={true}
         maxWidth="xs"
-        onClose={() => setNickNmaeModalOpen(false)}
+        onClose={() => setNickNameModalOpen(false)}
       >
         <DialogTitle sx={{ fontWeight: 'bold', marginTop: '1rem' }}>
           회원가입
@@ -208,7 +215,7 @@ const Redirection = () => {
                   value={verificationNum}
                   onChange={e => setVerificationNum(e.target.value)}
                 />
-                <Typography mx="0.7rem">2:50</Typography>
+                {/* <Typography mx="0.7rem">2:50</Typography> */}
                 <Button
                   type="submit"
                   sx={{
@@ -251,8 +258,8 @@ const Redirection = () => {
 
   return (
     <>
-      {localStorage.getItem('active') === null && <LoginProgress />}
-      {nickNmaeModalOpen && <AddMemberInfo />}
+      {/* {localStorage.getItem('active') === null && <LoginProgress />} */}
+      {nickNameModalOpen && <AddMemberInfo />}
     </>
   );
 };
