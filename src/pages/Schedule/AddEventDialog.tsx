@@ -15,7 +15,7 @@ import {
   Tooltip,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import dayjs, { Dayjs } from 'dayjs';
+import { Dayjs } from 'dayjs';
 //import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
 import {
   LocalizationProvider,
@@ -38,7 +38,9 @@ const emoji = [
   ['😀', '즐거움'],
   ['🥰', '행복'],
   ['😭', '슬픔'],
+  ['😡', '화남'],
   ['🫣', '부끄러움'],
+  ['🚫', '없음'],
 ];
 
 const AddEventDialog = ({
@@ -51,35 +53,43 @@ const AddEventDialog = ({
   const [selectedStartTime, setSelectedStartTime] =
     React.useState<Dayjs | null>();
   const [selectedEndTime, setSelectedEndTime] = React.useState<Dayjs | null>();
-  const [eventDeatil, setEventDeatil] = React.useState<Event>({
+  const [eventDeatil, setEventDetail] = React.useState<Event>({
     title: '',
     content: '',
     review: '',
   });
+  const [reviewFaceName, setReviewFaceName] = React.useState<string>('');
   const [isFull, setIsFull] = React.useState<boolean>(false);
 
   const handleClickAddEventBtn = async () => {
+    if (eventDeatil.title === '') {
+      window.alert('제목 입력은 필수입니다:)');
+      return;
+    } else if (!selectedDate) {
+      window.alert('날짜 선택은 필수입니다:)');
+      return;
+    }
     try {
-      if (eventDeatil.title !== '' && selectedDate) {
-        const formData = new FormData();
-        formData.append('title', eventDeatil.title);
-        if (eventDeatil.content !== '') {
-          formData.append('content', eventDeatil.content);
-        }
-
-        formData.append('eventDate', selectedDate.format('YYYY-MM-DD'));
-
-        if (isAlldayChecked) {
-          formData.append('allDay', 'true');
+      const formData = new FormData();
+      formData.append('title', eventDeatil.title);
+      formData.append('eventDate', selectedDate.format('YYYY-MM-DD'));
+      if (eventDeatil.content !== '') {
+        formData.append('content', eventDeatil.content);
+      }
+      if (eventDeatil.review !== '') {
+        formData.append('review', eventDeatil.review);
+      }
+      if (reviewFaceName !== '') formData.append('emotion', reviewFaceName);
+      if (isAlldayChecked) {
+        formData.append('allDay', 'true');
+      } else {
+        if (selectedStartTime && selectedEndTime) {
+          formData.append('allDay', 'false');
+          formData.append('startTime', selectedStartTime.format('HH:mm'));
+          formData.append('endTime', selectedEndTime.format('HH:mm'));
         } else {
-          if (selectedStartTime && selectedEndTime) {
-            formData.append('allDay', 'false');
-            formData.append('startTime', selectedStartTime.format('HH:mm'));
-            formData.append('endTime', selectedEndTime.format('HH:mm'));
-          } else {
-            window.alert('일정 시간을 설정해주세요 :)');
-            return;
-          }
+          window.alert('일정 시간을 설정해주세요 :)');
+          return;
         }
 
         formData.append('repeatType', 'NONE');
@@ -87,14 +97,30 @@ const AddEventDialog = ({
         formData.append('notificationTime', 'ON_TIME');
 
         const { data } = await EventAPI.post('/events', formData);
-
         onAddEvent(data);
 
         setAddEventDialogOpen(false);
+        setAlldayChecked(false);
+        setSelectedDate(null);
+        setSelectedStartTime(null);
+        setSelectedEndTime(null);
+        setEventDetail({ title: '', content: '', review: '' });
+        setReviewFaceName('');
+        setIsFull(false);
       }
     } catch (err) {
       console.error('Error:', err.response?.data || err.message);
     }
+  };
+
+  const handleClickEmoji = (faceName: string) => {
+    if (faceName === '보통') setReviewFaceName('NEUTRAL');
+    else if (faceName === '즐거움') setReviewFaceName('HAPPY');
+    else if (faceName === '행복') setReviewFaceName('LOVE');
+    else if (faceName === '슬픔') setReviewFaceName('SAD');
+    else if (faceName === '화남') setReviewFaceName('ANGRY');
+    else if (faceName === '부끄러움') setReviewFaceName('SHY');
+    else setReviewFaceName('');
   };
 
   return (
@@ -115,7 +141,7 @@ const AddEventDialog = ({
           placeholder="제목 추가"
           value={eventDeatil.title}
           onChange={e =>
-            setEventDeatil(prev => ({ ...prev, title: e.target.value }))
+            setEventDetail(prev => ({ ...prev, title: e.target.value }))
           }
           sx={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '20px' }}
         />
@@ -146,12 +172,12 @@ const AddEventDialog = ({
           >
             <Typography marginRight="10px">시간:</Typography>
             <TimePicker
-              defaultValue={dayjs()}
+              //defaultValue={dayjs()}
               value={selectedStartTime}
               onChange={setSelectedStartTime}
               format="HH:mm"
               sx={{
-                width: '105px',
+                width: '116px',
                 '& .MuiOutlinedInput-root': { height: '38px' },
               }}
               disabled={isAlldayChecked}
@@ -160,12 +186,12 @@ const AddEventDialog = ({
               -
             </Typography>
             <TimePicker
-              defaultValue={dayjs().add(1, 'hour')}
+              //defaultValue={dayjs().add(1, 'hour')}
               value={selectedEndTime}
               onChange={setSelectedEndTime}
               format="HH:mm"
               sx={{
-                width: '105px',
+                width: '116px',
                 '& .MuiOutlinedInput-root': { height: '38px' },
                 marginRight: '20px',
               }}
@@ -200,7 +226,7 @@ const AddEventDialog = ({
           sx={{ marginTop: '5px' }}
           value={eventDeatil.content}
           onChange={e =>
-            setEventDeatil(prev => ({ ...prev, content: e.target.value }))
+            setEventDetail(prev => ({ ...prev, content: e.target.value }))
           }
         />
         {isFull ? (
@@ -215,7 +241,7 @@ const AddEventDialog = ({
               sx={{ marginTop: '5px' }}
               value={eventDeatil.review}
               onChange={e =>
-                setEventDeatil(prev => ({ ...prev, review: e.target.value }))
+                setEventDetail(prev => ({ ...prev, review: e.target.value }))
               }
             />
             <Stack display="flex" flexDirection="row">
@@ -238,6 +264,7 @@ const AddEventDialog = ({
                     }}
                   >
                     <Box
+                      onClick={() => handleClickEmoji(face[1])}
                       sx={{
                         display: 'flex',
                         alignItems: 'center',

@@ -1,9 +1,11 @@
 import React from 'react';
 import SearchIcon from '@mui/icons-material/Search';
 import { Input, InputAdornment } from '@mui/material';
+import { useRecoilState } from 'recoil';
+import { searchTermAtom } from '../../recoil/search/searchTermAtom';
 
 const SearchBar = () => {
-  const [searchTerm, setSearchTerm] = React.useState<string>('');
+  const [searchTerm, setSearchTerm] = useRecoilState(searchTermAtom);
 
   return (
     <Input

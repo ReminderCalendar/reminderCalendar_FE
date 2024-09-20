@@ -20,6 +20,7 @@ const ReminderAPI = {
   get: (url: string) => instance.get(url),
   post: (url: string, data: object, config?: AxiosRequestConfig) =>
     instance.post(url, data, config),
+  delete: (url: string) => instance.delete(url),
 };
 
 export default ReminderAPI;

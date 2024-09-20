@@ -2,9 +2,13 @@ import React from 'react';
 import { Button, Stack, Typography } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import { StyledCalendar } from './CalendarStyle';
+import ScheduleList from './List/ScheduleList';
 import WeeklySchedule from './WeeklySchedule';
+import { useRecoilValue } from 'recoil';
+import { searchTermAtom } from '../../recoil/search/searchTermAtom';
 
 const Schedule = () => {
+  const searchTerm = useRecoilValue(searchTermAtom);
   const [today, setToday] = React.useState(new Date());
 
   const onChangeToday = () => {
@@ -28,7 +32,7 @@ const Schedule = () => {
         </Button>
         <StyledCalendar onChange={onChangeToday} value={today} />
       </Stack>
-      <WeeklySchedule />
+      {searchTerm === '' ? <WeeklySchedule /> : <ScheduleList />}
     </Stack>
   );
 };

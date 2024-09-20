@@ -11,11 +11,13 @@ import {
   styled,
 } from '@mui/material';
 import AddEventDialog from './AddEventDialog';
+import EventDetailModal from './EventDetailModal';
 import moment from 'moment';
 import 'moment/locale/ko';
 import Reminder from '../../api/api';
 
 export interface Schedule {
+  id: number;
   title: string;
   eventDate: string;
   allDay: boolean;
@@ -73,6 +75,16 @@ const EventCell = styled(TableCell)({
 
 const WeeklySchedule = () => {
   const [addEventDialogOpen, setAddEventDialogOpen] = React.useState(false);
+  const [eventDetailModalOpen, setEventDetailModalOpen] =
+    React.useState<boolean>(false);
+
+  const [selectedEvent, setSelectedEvent] = React.useState<Schedule | null>(
+    null,
+  );
+  const [modalPosition, setModalPosition] = React.useState<{
+    top: number;
+    left: number;
+  } | null>(null);
 
   const [monEvents, setMonEvents] = React.useState<Schedule[]>([]);
   const [tueEvents, setTueEvents] = React.useState<Schedule[]>([]);
@@ -85,7 +97,7 @@ const WeeklySchedule = () => {
   const handleAddEvent = (newEvent: Schedule) => {
     const eventDate = moment(newEvent.eventDate, 'YYYY-MM-DD').day();
 
-    // 요일별로 이벤트를 추가하는 로직
+    // 요일별로 해당 이벤트추가
     if (eventDate === 0) setSunEvents(prev => [...prev, newEvent]);
     if (eventDate === 1) setMonEvents(prev => [...prev, newEvent]);
     if (eventDate === 2) setTueEvents(prev => [...prev, newEvent]);
@@ -93,6 +105,43 @@ const WeeklySchedule = () => {
     if (eventDate === 4) setThuEvents(prev => [...prev, newEvent]);
     if (eventDate === 5) setFriEvents(prev => [...prev, newEvent]);
     if (eventDate === 6) setSatEvents(prev => [...prev, newEvent]);
+  };
+
+  const handleDeleteEvent = async (eventToDelete: Schedule) => {
+    const eventDate = moment(eventToDelete.eventDate, 'YYYY-MM-DD').day();
+
+    try {
+      await Reminder.delete(`/events/${eventToDelete.id}`);
+    } catch (err) {
+      console.error(err);
+    }
+
+    // 요일별로 해당 이벤트삭제
+    if (eventDate === 0)
+      setSunEvents(prev => prev.filter(event => event.id !== eventToDelete.id));
+    if (eventDate === 1)
+      setMonEvents(prev => prev.filter(event => event.id !== eventToDelete.id));
+    if (eventDate === 2)
+      setTueEvents(prev => prev.filter(event => event.id !== eventToDelete.id));
+    if (eventDate === 3)
+      setWedEvents(prev => prev.filter(event => event.id !== eventToDelete.id));
+    if (eventDate === 4)
+      setThuEvents(prev => prev.filter(event => event.id !== eventToDelete.id));
+    if (eventDate === 5)
+      setFriEvents(prev => prev.filter(event => event.id !== eventToDelete.id));
+    if (eventDate === 6)
+      setSatEvents(prev => prev.filter(event => event.id !== eventToDelete.id));
+  };
+
+  const handleEventClick = (e: React.MouseEvent, event: Schedule) => {
+    const rect = (e.target as HTMLElement).getBoundingClientRect();
+    setModalPosition({
+      top: rect.top + window.scrollY,
+      left: rect.left + window.scrollX - rect.width * 3 - 35,
+    });
+    // 선택한 이벤트 저장
+    setSelectedEvent(event);
+    setEventDetailModalOpen(true);
   };
 
   React.useEffect(() => {
@@ -138,17 +187,25 @@ const WeeklySchedule = () => {
         moment(event.endTime, 'HH:mm').minutes() / 60 -
         (moment(event.startTime, 'HH:mm').hour() +
           moment(event.startTime, 'HH:mm').minutes() / 60);
+      const startHeight =
+        (moment(event.startTime, 'HH:mm').minutes() / 60) * 40;
 
       return (
         <Box
           key={index}
+          onClick={e => {
+            e.stopPropagation();
+            handleEventClick(e, event);
+          }}
           sx={{
             position: 'absolute',
+            top: `${startHeight}px`,
+
             fontSize: '12px',
             textOverflow: 'ellipsis',
             color: 'white',
             backgroundColor: theme => theme.palette.primary.main,
-            width: '40px',
+            width: '80px',
             height: `${durationTime * 40}px`,
             borderRadius: '4px',
             padding: '2px 5px',
@@ -168,7 +225,7 @@ const WeeklySchedule = () => {
       sx={{
         paddingLeft: '20px',
         maxHeight: '810px',
-        overflowY: 'scroll',
+        overflowY: eventDetailModalOpen ? 'hidden' : 'scroll',
       }}
     >
       {addEventDialogOpen && (
@@ -176,6 +233,14 @@ const WeeklySchedule = () => {
           addEventDialogOpen={addEventDialogOpen}
           setAddEventDialogOpen={setAddEventDialogOpen}
           onAddEvent={handleAddEvent}
+        />
+      )}
+      {eventDetailModalOpen && selectedEvent && modalPosition && (
+        <EventDetailModal
+          setEventDetailModalOpen={setEventDetailModalOpen}
+          event={selectedEvent}
+          position={modalPosition}
+          onDeleteEvent={handleDeleteEvent}
         />
       )}
       <Table stickyHeader>
