@@ -3,13 +3,10 @@ import styled from '@emotion/styled';
 import Calendar from 'react-calendar';
 
 export const StyledCalendar = styled(Calendar)({
-  position: 'fixed',
   width: '330px',
   fontWeight: 'bold',
   backgroundColor: '#fff5f6',
   border: 'none',
-  marginTop: '85px',
-  zIndex: -1,
 
   '& .react-calendar__navigation': {
     height: '40px',

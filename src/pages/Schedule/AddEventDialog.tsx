@@ -24,11 +24,13 @@ import {
 } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import EventAPI from '../../api/EventAPI';
+import { Schedule } from './WeeklySchedule';
 
 type Event = { title: string; content: string; review: string };
 interface AddEventDialogProps {
   addEventDialogOpen: boolean;
   setAddEventDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  onAddEvent: (newEvent: Schedule) => void;
 }
 
 const emoji = [
@@ -42,6 +44,7 @@ const emoji = [
 const AddEventDialog = ({
   addEventDialogOpen,
   setAddEventDialogOpen,
+  onAddEvent,
 }: AddEventDialogProps) => {
   const [isAlldayChecked, setAlldayChecked] = React.useState<boolean>(false);
   const [selectedDate, setSelectedDate] = React.useState<Dayjs | null>();
@@ -73,6 +76,9 @@ const AddEventDialog = ({
             formData.append('allDay', 'false');
             formData.append('startTime', selectedStartTime.format('HH:mm'));
             formData.append('endTime', selectedEndTime.format('HH:mm'));
+          } else {
+            window.alert('일정 시간을 설정해주세요 :)');
+            return;
           }
         }
 
@@ -81,7 +87,10 @@ const AddEventDialog = ({
         formData.append('notificationTime', 'ON_TIME');
 
         const { data } = await EventAPI.post('/events', formData);
-        console.log(data);
+
+        onAddEvent(data);
+
+        setAddEventDialogOpen(false);
       }
     } catch (err) {
       console.error('Error:', err.response?.data || err.message);
