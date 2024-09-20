@@ -18,6 +18,7 @@ instance.interceptors.request.use(req => {
 
 const ReminderAPI = {
   get: (url: string) => instance.get(url),
+  patch: (url: string, data?: object) => instance.patch(url, data),
   post: (url: string, data: object, config?: AxiosRequestConfig) =>
     instance.post(url, data, config),
 };

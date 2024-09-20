@@ -2,6 +2,7 @@ import React from 'react';
 import { Box, Stack, IconButton, Typography, ButtonGroup } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
 import { Schedule } from './WeeklySchedule';
 
 interface EventDetailModalProps {
@@ -9,6 +10,7 @@ interface EventDetailModalProps {
   event: Schedule | null;
   position: { top: number; left: number } | null;
   onDeleteEvent: (delEvent: Schedule) => void;
+  onEditMode: (event: Schedule) => void;
 }
 
 const EventDetailModal = ({
@@ -16,12 +18,20 @@ const EventDetailModal = ({
   event,
   position,
   onDeleteEvent,
+  onEditMode,
 }: EventDetailModalProps) => {
   if (!event || !position) return null;
 
   const handleDeleteClick = () => {
     if (event) {
       onDeleteEvent(event);
+      setEventDetailModalOpen(false);
+    }
+  };
+
+  const handleEditClick = () => {
+    if (event) {
+      onEditMode(event);
       setEventDetailModalOpen(false);
     }
   };
@@ -48,6 +58,9 @@ const EventDetailModal = ({
       }}
     >
       <ButtonGroup sx={{ marginLeft: 'auto' }}>
+        <IconButton size="small" onClick={handleEditClick}>
+          <EditIcon />
+        </IconButton>
         <IconButton size="small" onClick={handleDeleteClick}>
           <DeleteIcon />
         </IconButton>

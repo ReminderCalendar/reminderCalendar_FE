@@ -15,7 +15,7 @@ import {
   Tooltip,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import { Dayjs } from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs';
 //import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
 import {
   LocalizationProvider,
@@ -30,46 +30,96 @@ type Event = { title: string; content: string; review: string };
 interface AddEventDialogProps {
   addEventDialogOpen: boolean;
   setAddEventDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  onAddEvent: (newEvent: Schedule) => void;
+  onAddOrEditEvent: (newEvent: Schedule) => void;
+  isEditMode: boolean;
+  eventToEdit: Schedule | null;
 }
 
 const emoji = [
-  ['😶', '보통'],
-  ['😀', '즐거움'],
-  ['🥰', '행복'],
-  ['😭', '슬픔'],
-  ['😡', '화남'],
-  ['🫣', '부끄러움'],
-  ['🚫', '없음'],
+  ['😶', '보통', 'NEUTRAL'],
+  ['😀', '즐거움', 'HAPPY'],
+  ['🥰', '행복', 'LOVE'],
+  ['😭', '슬픔', 'SAD'],
+  ['😡', '화남', 'ANGRY'],
+  ['🫣', '부끄러움', 'SHY'],
+  ['🚫', '없음', ''],
 ];
 
 const AddEventDialog = ({
   addEventDialogOpen,
   setAddEventDialogOpen,
-  onAddEvent,
+  onAddOrEditEvent,
+  isEditMode,
+  eventToEdit,
 }: AddEventDialogProps) => {
   const [isAlldayChecked, setAlldayChecked] = React.useState<boolean>(false);
-  const [selectedDate, setSelectedDate] = React.useState<Dayjs | null>();
+  const [selectedDate, setSelectedDate] = React.useState<Dayjs | null>(
+    eventToEdit?.eventDate ? dayjs(eventToEdit.eventDate) : null,
+  );
   const [selectedStartTime, setSelectedStartTime] =
     React.useState<Dayjs | null>();
   const [selectedEndTime, setSelectedEndTime] = React.useState<Dayjs | null>();
   const [eventDeatil, setEventDetail] = React.useState<Event>({
-    title: '',
-    content: '',
-    review: '',
+    title: eventToEdit?.title || '',
+    content: eventToEdit?.content || '',
+    review: eventToEdit?.review || '',
   });
-  const [reviewFaceName, setReviewFaceName] = React.useState<string>('');
+  const [reviewFaceName, setReviewFaceName] = React.useState<string>(
+    eventToEdit?.emotion || '',
+  );
   const [isFull, setIsFull] = React.useState<boolean>(false);
+  console.log(eventToEdit);
+  const handleSave = async () => {
+    if (eventToEdit) {
+      //일정 수정 모드일떄
+      const editData = new FormData();
+      editData.append('eventId', eventToEdit.id.toString());
+      if (eventDeatil.title !== '' && eventDeatil.title !== eventToEdit.title)
+        editData.append('title', eventDeatil.title);
+      if (
+        eventDeatil.content !== '' &&
+        eventDeatil.content !== eventToEdit.content
+      )
+        editData.append('content', eventDeatil.content);
+      if (
+        eventDeatil.review !== '' &&
+        eventDeatil.review !== eventToEdit.review
+      )
+        editData.append('review', eventDeatil.review);
+      if (
+        selectedDate &&
+        selectedDate.format('YYYY-MM-DD') !== eventToEdit.eventDate
+      )
+        editData.append('eventDate', selectedDate.format('YYYY-MM-DD'));
+      if (reviewFaceName !== '' && reviewFaceName !== eventToEdit.emotion)
+        editData.append('emotion', reviewFaceName);
+      //시간 default dayjs 형식으로 안되는문제 해결
 
-  const handleClickAddEventBtn = async () => {
-    if (eventDeatil.title === '') {
-      window.alert('제목 입력은 필수입니다:)');
-      return;
-    } else if (!selectedDate) {
-      window.alert('날짜 선택은 필수입니다:)');
-      return;
-    }
-    try {
+      try {
+        const { data } = await EventAPI.patch('/events', editData);
+        onAddOrEditEvent(data);
+
+        setAddEventDialogOpen(false);
+        setAlldayChecked(false);
+        setSelectedDate(null);
+        setSelectedStartTime(null);
+        setSelectedEndTime(null);
+        setEventDetail({ title: '', content: '', review: '' });
+        setReviewFaceName('');
+        setIsFull(false);
+      } catch (err) {
+        console.error('Error:', err.response?.data || err.message);
+      }
+    } else {
+      //일정 추가 모드일때
+      if (eventDeatil.title === '') {
+        window.alert('제목 입력은 필수입니다:)');
+        return;
+      } else if (!selectedDate) {
+        window.alert('날짜 선택은 필수입니다:)');
+        return;
+      }
+
       const formData = new FormData();
       formData.append('title', eventDeatil.title);
       formData.append('eventDate', selectedDate.format('YYYY-MM-DD'));
@@ -91,13 +141,14 @@ const AddEventDialog = ({
           window.alert('일정 시간을 설정해주세요 :)');
           return;
         }
+      }
+      formData.append('repeatType', 'NONE');
+      formData.append('notificationType', 'NONE');
+      formData.append('notificationTime', 'ON_TIME');
 
-        formData.append('repeatType', 'NONE');
-        formData.append('notificationType', 'NONE');
-        formData.append('notificationTime', 'ON_TIME');
-
+      try {
         const { data } = await EventAPI.post('/events', formData);
-        onAddEvent(data);
+        onAddOrEditEvent(data);
 
         setAddEventDialogOpen(false);
         setAlldayChecked(false);
@@ -107,9 +158,9 @@ const AddEventDialog = ({
         setEventDetail({ title: '', content: '', review: '' });
         setReviewFaceName('');
         setIsFull(false);
+      } catch (err) {
+        console.error('Error:', err.response?.data || err.message);
       }
-    } catch (err) {
-      console.error('Error:', err.response?.data || err.message);
     }
   };
 
@@ -172,7 +223,6 @@ const AddEventDialog = ({
           >
             <Typography marginRight="10px">시간:</Typography>
             <TimePicker
-              //defaultValue={dayjs()}
               value={selectedStartTime}
               onChange={setSelectedStartTime}
               format="HH:mm"
@@ -186,7 +236,6 @@ const AddEventDialog = ({
               -
             </Typography>
             <TimePicker
-              //defaultValue={dayjs().add(1, 'hour')}
               value={selectedEndTime}
               onChange={setSelectedEndTime}
               format="HH:mm"
@@ -279,6 +328,10 @@ const AddEventDialog = ({
                           backgroundColor: 'lightGray',
                         },
                         cursor: 'pointer',
+                        backgroundColor:
+                          reviewFaceName === face[2]
+                            ? theme => theme.palette.primary.main
+                            : 'none',
                       }}
                     >
                       {face[0]}
@@ -294,8 +347,8 @@ const AddEventDialog = ({
         <Button onClick={() => setIsFull(!isFull)}>
           {isFull ? '옵션 숨기기' : '옵션 더보기'}
         </Button>
-        <Button variant="contained" onClick={handleClickAddEventBtn}>
-          저장
+        <Button variant="contained" onClick={handleSave}>
+          {isEditMode ? '수정' : '저장'}
         </Button>
       </DialogActions>
     </Dialog>

@@ -77,7 +77,10 @@ const WeeklySchedule = () => {
   const [addEventDialogOpen, setAddEventDialogOpen] = React.useState(false);
   const [eventDetailModalOpen, setEventDetailModalOpen] =
     React.useState<boolean>(false);
-
+  //수정모드
+  const [isEditMode, setIsEditMode] = React.useState(false);
+  const [eventToEdit, setEventToEdit] = React.useState<Schedule | null>(null);
+  //선택된 일정과 위치
   const [selectedEvent, setSelectedEvent] = React.useState<Schedule | null>(
     null,
   );
@@ -93,6 +96,18 @@ const WeeklySchedule = () => {
   const [friEvents, setFriEvents] = React.useState<Schedule[]>([]);
   const [satEvents, setSatEvents] = React.useState<Schedule[]>([]);
   const [sunEvents, setSunEvents] = React.useState<Schedule[]>([]);
+
+  const handleAddOrEditEvent = (newEvent: Schedule) => {
+    if (isEditMode) {
+      handleUpdateEvent(newEvent);
+      setIsEditMode(false); // 수정 모드 해제
+      setEventToEdit(null); // 수정할 이벤트 초기화
+    } else {
+      handleAddEvent(newEvent);
+    }
+
+    setAddEventDialogOpen(false); // 다이얼로그 닫기
+  };
 
   const handleAddEvent = (newEvent: Schedule) => {
     const eventDate = moment(newEvent.eventDate, 'YYYY-MM-DD').day();
@@ -131,6 +146,27 @@ const WeeklySchedule = () => {
       setFriEvents(prev => prev.filter(event => event.id !== eventToDelete.id));
     if (eventDate === 6)
       setSatEvents(prev => prev.filter(event => event.id !== eventToDelete.id));
+  };
+
+  const handleUpdateEvent = (editEvent: Schedule) => {
+    const eventDate = moment(editEvent.eventDate, 'YYYY-MM-DD').day();
+
+    const updateEventInDay = (events: Schedule[]) =>
+      events.map(event => (event === eventToEdit ? editEvent : event));
+
+    if (eventDate === 0) setSunEvents(prev => updateEventInDay(prev));
+    if (eventDate === 1) setMonEvents(prev => updateEventInDay(prev));
+    if (eventDate === 2) setTueEvents(prev => updateEventInDay(prev));
+    if (eventDate === 3) setWedEvents(prev => updateEventInDay(prev));
+    if (eventDate === 4) setThuEvents(prev => updateEventInDay(prev));
+    if (eventDate === 5) setFriEvents(prev => updateEventInDay(prev));
+    if (eventDate === 6) setSatEvents(prev => updateEventInDay(prev));
+  };
+
+  const handleEditModeOn = (event: Schedule) => {
+    setIsEditMode(true);
+    setEventToEdit(event);
+    setAddEventDialogOpen(true);
   };
 
   const handleEventClick = (e: React.MouseEvent, event: Schedule) => {
@@ -232,7 +268,9 @@ const WeeklySchedule = () => {
         <AddEventDialog
           addEventDialogOpen={addEventDialogOpen}
           setAddEventDialogOpen={setAddEventDialogOpen}
-          onAddEvent={handleAddEvent}
+          onAddOrEditEvent={handleAddOrEditEvent}
+          isEditMode={isEditMode}
+          eventToEdit={eventToEdit}
         />
       )}
       {eventDetailModalOpen && selectedEvent && modalPosition && (
@@ -241,6 +279,7 @@ const WeeklySchedule = () => {
           event={selectedEvent}
           position={modalPosition}
           onDeleteEvent={handleDeleteEvent}
+          onEditMode={handleEditModeOn}
         />
       )}
       <Table stickyHeader>
