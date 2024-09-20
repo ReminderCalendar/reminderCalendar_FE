@@ -73,7 +73,6 @@ const AddEventDialog = ({
     if (eventToEdit) {
       //일정 수정 모드일떄
       const editData = new FormData();
-      editData.append('eventId', eventToEdit.id.toString());
       if (eventDeatil.title !== '' && eventDeatil.title !== eventToEdit.title)
         editData.append('title', eventDeatil.title);
       if (
@@ -96,7 +95,10 @@ const AddEventDialog = ({
       //시간 default dayjs 형식으로 안되는문제 해결
 
       try {
-        const { data } = await EventAPI.patch('/events', editData);
+        const { data } = await EventAPI.patch(
+          `/events/${eventToEdit.id}`,
+          editData,
+        );
         onAddOrEditEvent(data);
 
         setAddEventDialogOpen(false);

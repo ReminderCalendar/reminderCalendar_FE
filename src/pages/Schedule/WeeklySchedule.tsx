@@ -106,7 +106,7 @@ const WeeklySchedule = () => {
       handleAddEvent(newEvent);
     }
 
-    setAddEventDialogOpen(false); // 다이얼로그 닫기
+    setAddEventDialogOpen(false);
   };
 
   const handleAddEvent = (newEvent: Schedule) => {
@@ -173,7 +173,7 @@ const WeeklySchedule = () => {
     const rect = (e.target as HTMLElement).getBoundingClientRect();
     setModalPosition({
       top: rect.top + window.scrollY,
-      left: rect.left + window.scrollX - rect.width * 3 - 35,
+      left: rect.left + window.scrollX - rect.width - 285,
     });
     // 선택한 이벤트 저장
     setSelectedEvent(event);

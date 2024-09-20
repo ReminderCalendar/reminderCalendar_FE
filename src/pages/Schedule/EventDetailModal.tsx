@@ -1,5 +1,13 @@
 import React from 'react';
-import { Box, Stack, IconButton, Typography, ButtonGroup } from '@mui/material';
+import {
+  Box,
+  Stack,
+  IconButton,
+  Typography,
+  ButtonGroup,
+  Button,
+  Divider,
+} from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
@@ -20,6 +28,8 @@ const EventDetailModal = ({
   onDeleteEvent,
   onEditMode,
 }: EventDetailModalProps) => {
+  const [moreEventDetail, setMoreEventDetail] = React.useState<boolean>(false);
+
   if (!event || !position) return null;
 
   const handleDeleteClick = () => {
@@ -47,7 +57,7 @@ const EventDetailModal = ({
         display: 'flex',
         flexDirection: 'column',
 
-        width: '280px',
+        width: '350px',
         paddingX: '8px',
         paddingBottom: '8px',
 
@@ -71,7 +81,7 @@ const EventDetailModal = ({
 
       <Stack
         sx={{
-          padding: '15px',
+          padding: '15px 15px 5px 15px',
           borderRadius: '10px',
           background: theme => theme.palette.primary.light,
         }}
@@ -81,7 +91,53 @@ const EventDetailModal = ({
           {event.eventDate.substring(5, 7)}월 {event.eventDate.substring(8, 10)}
           일 · {event.startTime} - {event.endTime}
         </Typography>
-        <Typography>{event.content}</Typography>
+        <Typography marginTop="20px">{event.content}</Typography>
+        {moreEventDetail && (
+          <>
+            <Divider sx={{ marginTop: '20px', marginBottom: '15px' }} />
+            <Stack display="flex" flexDirection="row" alignItems="end">
+              <Typography fontSize="20px">
+                {event.emotion === 'NEUTRAL'
+                  ? '😶'
+                  : event.emotion === 'HAPPY'
+                    ? '😀'
+                    : event.emotion === 'LOVE'
+                      ? '🥰'
+                      : event.emotion === 'SAD'
+                        ? '😭'
+                        : event.emotion === 'ANGRY'
+                          ? '😡'
+                          : event.emotion === 'SHY'
+                            ? '🫣'
+                            : '⚪'}
+              </Typography>
+              <Typography variant="caption" marginBottom="2px" marginLeft="2px">
+                나의 후기
+              </Typography>
+            </Stack>
+            <Box
+              border="1px solid lightgray"
+              borderRadius="5px"
+              marginTop="5px"
+              minHeight="50px"
+              fontSize="14px"
+              padding="10px"
+            >
+              {event.review || '후기를 작성해 주세요 :)'}
+            </Box>
+          </>
+        )}
+        <Button
+          onClick={() => setMoreEventDetail(!moreEventDetail)}
+          sx={{
+            marginTop: '10px',
+            ':hover': {
+              backgroundColor: 'white',
+            },
+          }}
+        >
+          {moreEventDetail ? '숨기기' : '더보기'}
+        </Button>
       </Stack>
     </Box>
   );
