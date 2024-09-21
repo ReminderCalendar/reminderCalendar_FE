@@ -7,10 +7,11 @@ import {
   Button,
   IconButton,
 } from '@mui/material';
-import ReminderLogo from '../assets/reminder.png';
+import ReminderLogo from '../../assets/reminder.png';
 import { useRecoilState } from 'recoil';
-import { isModalOpenAtom } from '../recoil/login/loginModalAtoms';
+import { isModalOpenAtom } from '../../recoil/login/loginModalAtoms';
 import { useNavigate } from 'react-router-dom';
+import SearchBar from './SearchBar';
 
 const NavBar = () => {
   const [isModalOpen, setModalOpen] = useRecoilState<boolean>(isModalOpenAtom);
@@ -32,6 +33,7 @@ const NavBar = () => {
           ReminderCalendar
         </Typography>
         <Box sx={{ marginLeft: 'auto' }}>
+          <SearchBar />
           {localStorage.getItem('accessToken') !== null ? (
             <Button
               sx={{ color: 'black', fontWeight: 'bold' }}

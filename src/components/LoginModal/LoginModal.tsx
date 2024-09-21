@@ -47,7 +47,7 @@ const LoginModal = () => {
 
       <DialogBox
         sx={{
-          backgroundColor: theme => theme.palette.primary.main,
+          backgroundColor: theme => theme.palette.primary.light,
         }}
       >
         <Box
@@ -79,7 +79,7 @@ const LoginModal = () => {
           <Link href={KAKAO_AUTH_URL}>
             <BtnBox className="kakao_login_btn" />
           </Link>
-          <Link href={GOOGLE_AUTH_URL}>
+          <Link href={GOOGLE_AUTH_URL} underline="none">
             <BtnBox className="google_login_btn">
               <Avatar
                 src={GoogleLogo}
