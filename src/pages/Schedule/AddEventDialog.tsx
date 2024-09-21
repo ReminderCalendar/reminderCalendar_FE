@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -14,7 +14,10 @@ import {
   Box,
   Tooltip,
 } from '@mui/material';
+// import { Select, Option } from '@mui/joy';
+// import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown';
 import CloseIcon from '@mui/icons-material/Close';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import dayjs, { Dayjs } from 'dayjs';
 //import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
 import {
@@ -30,9 +33,11 @@ type Event = { title: string; content: string; review: string };
 interface AddEventDialogProps {
   addEventDialogOpen: boolean;
   setAddEventDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  onAddOrEditEvent: (newEvent: Schedule) => void;
+  /* eslint-disable-next-line no-unused-vars */
+  onAddOrEditEvent: (event: Schedule) => void;
   isEditMode: boolean;
   eventToEdit: Schedule | null;
+  setEventToEdit: React.Dispatch<React.SetStateAction<Schedule | null>>;
 }
 
 const emoji = [
@@ -51,24 +56,25 @@ const AddEventDialog = ({
   onAddOrEditEvent,
   isEditMode,
   eventToEdit,
+  setEventToEdit,
 }: AddEventDialogProps) => {
-  const [isAlldayChecked, setAlldayChecked] = React.useState<boolean>(false);
-  const [selectedDate, setSelectedDate] = React.useState<Dayjs | null>(
+  const [isAlldayChecked, setAlldayChecked] = useState<boolean>(false);
+  const [selectedDate, setSelectedDate] = useState<Dayjs | null>(
     eventToEdit?.eventDate ? dayjs(eventToEdit.eventDate) : null,
   );
-  const [selectedStartTime, setSelectedStartTime] =
-    React.useState<Dayjs | null>();
-  const [selectedEndTime, setSelectedEndTime] = React.useState<Dayjs | null>();
-  const [eventDeatil, setEventDetail] = React.useState<Event>({
+  const [selectedStartTime, setSelectedStartTime] = useState<Dayjs | null>();
+  const [selectedEndTime, setSelectedEndTime] = useState<Dayjs | null>();
+  const [eventDeatil, setEventDetail] = useState<Event>({
     title: eventToEdit?.title || '',
     content: eventToEdit?.content || '',
     review: eventToEdit?.review || '',
   });
-  const [reviewFaceName, setReviewFaceName] = React.useState<string>(
+  const [reviewFaceName, setReviewFaceName] = useState<string>(
     eventToEdit?.emotion || '',
   );
-  const [isFull, setIsFull] = React.useState<boolean>(false);
-  console.log(eventToEdit);
+  const [address, setAddress] = useState<string>('');
+  const [isFull, setIsFull] = useState<boolean>(false);
+
   const handleSave = async () => {
     if (eventToEdit) {
       //일정 수정 모드일떄
@@ -99,6 +105,7 @@ const AddEventDialog = ({
           `/events/${eventToEdit.id}`,
           editData,
         );
+        setEventToEdit(data);
         onAddOrEditEvent(data);
 
         setAddEventDialogOpen(false);
@@ -212,8 +219,8 @@ const AddEventDialog = ({
               value={selectedDate}
               onChange={setSelectedDate}
               sx={{
-                width: '180px',
-                '& .MuiOutlinedInput-root': { height: '38px' },
+                width: '165px',
+                '& .MuiOutlinedInput-root': { height: '35px' },
               }}
             />
           </Stack>
@@ -230,7 +237,7 @@ const AddEventDialog = ({
               format="HH:mm"
               sx={{
                 width: '116px',
-                '& .MuiOutlinedInput-root': { height: '38px' },
+                '& .MuiOutlinedInput-root': { height: '35px' },
               }}
               disabled={isAlldayChecked}
             />
@@ -243,7 +250,7 @@ const AddEventDialog = ({
               format="HH:mm"
               sx={{
                 width: '116px',
-                '& .MuiOutlinedInput-root': { height: '38px' },
+                '& .MuiOutlinedInput-root': { height: '35px' },
                 marginRight: '20px',
               }}
               disabled={isAlldayChecked}
@@ -267,6 +274,27 @@ const AddEventDialog = ({
             />
           </Stack>
         </LocalizationProvider>
+        {isFull && (
+          <>
+            <Stack marginBottom="20px">
+              <Typography marginRight="10px">알림:</Typography>
+              {/* <Select placeholder="이메일 알림 시간 설정">
+                <Option value="dog">Dog</Option>
+                <Option value="cat">Cat</Option>
+                <Option value="fish">Fish</Option>
+                <Option value="bird">Bird</Option>
+              </Select> */}
+            </Stack>
+            <Stack marginBottom="20px" display="flex" flexDirection="row">
+              <Typography marginRight="10px">주소:</Typography>
+              <Input
+                value={address}
+                onChange={e => setAddress(e.target.value)}
+                sx={{ width: '330px' }}
+              />
+            </Stack>
+          </>
+        )}
         <TextField
           id="standard-textarea"
           label="내용 추가"
@@ -280,6 +308,25 @@ const AddEventDialog = ({
             setEventDetail(prev => ({ ...prev, content: e.target.value }))
           }
         />
+        <Button
+          component="label"
+          role={undefined}
+          variant="contained"
+          tabIndex={-1}
+          startIcon={<CloudUploadIcon />}
+          sx={{
+            width: '180px',
+            height: '30px',
+            fontSize: '12px',
+            marginY: '10px',
+          }}
+        >
+          Upload files
+          {/*<input
+                type="file"
+                onChange={event => console.log(event.target.files)}
+              />*/}
+        </Button>
         {isFull ? (
           <Box>
             <Typography marginTop="20px">오늘의 일정은 어땠나요?</Typography>
@@ -299,6 +346,7 @@ const AddEventDialog = ({
               {emoji.map(face => {
                 return (
                   <Tooltip
+                    key={face[1]}
                     title={face[1]}
                     placement="bottom"
                     slotProps={{

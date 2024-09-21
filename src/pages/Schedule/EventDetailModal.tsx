@@ -17,8 +17,8 @@ interface EventDetailModalProps {
   setEventDetailModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
   event: Schedule | null;
   position: { top: number; left: number } | null;
-  onDeleteEvent: (delEvent: Schedule) => void;
-  onEditMode: (event: Schedule) => void;
+  onDeleteEvent: () => void;
+  onEditMode: () => void;
 }
 
 const EventDetailModal = ({
@@ -34,14 +34,14 @@ const EventDetailModal = ({
 
   const handleDeleteClick = () => {
     if (event) {
-      onDeleteEvent(event);
+      onDeleteEvent();
       setEventDetailModalOpen(false);
     }
   };
 
   const handleEditClick = () => {
     if (event) {
-      onEditMode(event);
+      onEditMode();
       setEventDetailModalOpen(false);
     }
   };

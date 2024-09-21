@@ -20,6 +20,7 @@ const ScheduleList = () => {
     Schedule[]
   >([]);
   const isEditMode = true;
+  const [editToEvent, setEditToEvent] = React.useState<Schedule | null>(null);
   const [selectedEvent, setSelectedEvent] = React.useState<Schedule | null>(
     null,
   );
@@ -36,13 +37,23 @@ const ScheduleList = () => {
     getEventList();
   }, [searchTerm]);
 
-  const handleListItemClick = (event: Schedule, eventElement: HTMLElement) => {
+  const handleListItemClick = async (
+    event: Schedule,
+    eventElement: HTMLElement,
+  ) => {
     const rect = eventElement.getBoundingClientRect();
     setModalPosition({
       top: rect.top + window.scrollY - 70,
       left: rect.left + 180,
     });
-    setSelectedEvent(event);
+
+    try {
+      const { data } = await Reminder.get(`/events/${event.id}`);
+      setSelectedEvent(data);
+    } catch (err) {
+      console.error(err);
+    }
+
     setEventDetailModalOpen(true);
   };
 
@@ -61,12 +72,14 @@ const ScheduleList = () => {
     setEventDetailModalOpen(false);
   };
 
-  const handleEditEvent = async (editEvent: Schedule) => {
+  const handleEditEvent = async () => {
     setAddEventDialogOpen(true);
-    setSearchtermEventList(prev =>
-      prev.map(event => (event === selectedEvent ? editEvent : event)),
-    );
-    //setSelectedEvent(null);
+
+    const updateEventInDay = (events: Schedule[]) =>
+      events.map(event => (event === editToEvent ? editToEvent : event));
+
+    setSearchtermEventList(prev => updateEventInDay(prev));
+    setSelectedEvent(null);
     setModalPosition(null);
   };
 
@@ -151,6 +164,7 @@ const ScheduleList = () => {
                 onAddOrEditEvent={handleEditEvent}
                 isEditMode={isEditMode}
                 eventToEdit={selectedEvent}
+                setEventToEdit={setEditToEvent}
               />
             )}
           </React.Fragment>
