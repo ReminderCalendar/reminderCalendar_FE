@@ -49,6 +49,18 @@ const Redirection = () => {
       try {
         const { data } = await Reminder.get(`/login/google?code=${code}`);
         localStorage.setItem('accessToken', data.accessToken);
+        console.log(data);
+        isMember();
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    const naverLogin = async () => {
+      try {
+        const { data } = await Reminder.get(`/login/naver?code=${code}`);
+        localStorage.setItem('accessToken', data.accessToken);
+        console.log(data);
         isMember();
       } catch (err) {
         console.error(err);
@@ -59,6 +71,8 @@ const Redirection = () => {
       kakaoLogin();
     } else if (window.location.href.includes('google')) {
       googleLogin();
+    } else if (window.location.href.includes('naver')) {
+      naverLogin();
     }
   }, [code, navigate]);
 

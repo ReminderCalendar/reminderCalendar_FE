@@ -1,5 +1,6 @@
 import React from 'react';
 import GoogleLogo from '../../assets/google_logo.png';
+//import NaverLogo from '../../assets/naver_logo.png';
 import ReminderCalendarLogo from '../../assets/reminder.png';
 import CloseIcon from '@mui/icons-material/Close';
 import {
@@ -14,6 +15,7 @@ import {
 import { DialogBox, BtnBox, SignText } from './LoginModalStyle';
 import { KAKAO_AUTH_URL } from '../../util/getAuthorizationCode';
 import { GOOGLE_AUTH_URL } from '../../util/getAuthorizationCode';
+//import { NAVER_AUTH_URL } from '../../util/getAuthorizationCode';
 import { useRecoilState } from 'recoil';
 import { isModalOpenAtom } from '../../recoil/login/loginModalAtoms';
 
@@ -79,6 +81,11 @@ const LoginModal = () => {
           <Link href={KAKAO_AUTH_URL}>
             <BtnBox className="kakao_login_btn" />
           </Link>
+          {/* <Link href={NAVER_AUTH_URL}>
+            <BtnBox className="google_login_btn">
+              <img src={NaverLogo} height="22px" />
+            </BtnBox>
+          </Link> */}
           <Link href={GOOGLE_AUTH_URL} underline="none">
             <BtnBox className="google_login_btn">
               <Avatar
