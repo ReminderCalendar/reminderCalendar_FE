@@ -26,9 +26,11 @@ export interface Schedule {
   review: string;
   emotion: string;
   content: string;
+  notificationType: string;
+  notificationTime: string;
 }
 
-const week = ['월', '화', '수', '목', '금', '토', '일'];
+const week = ['일', '월', '화', '수', '목', '금', '토'];
 const time = Array.from({ length: 24 }, (_, i) => i);
 
 const HeaderTableCell = styled(TableCell)({
@@ -42,8 +44,8 @@ const TodayCircle = styled('div')({
   backgroundColor: '#e5384f',
 
   position: 'absolute',
-  top: '50%',
-  left: '40%',
+  top: '48%',
+  left: '41%',
   zIndex: '-1',
 });
 
@@ -75,10 +77,15 @@ const EventCell = styled(TableCell)({
 
 interface WeeklyScheduleProps {
   curWeeklyNum: number;
+  addEventDialogOpen: boolean;
+  setAddEventDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const WeeklySchedule = ({ curWeeklyNum }: WeeklyScheduleProps) => {
-  const [addEventDialogOpen, setAddEventDialogOpen] = React.useState(false);
+const WeeklySchedule = ({
+  curWeeklyNum,
+  addEventDialogOpen,
+  setAddEventDialogOpen,
+}: WeeklyScheduleProps) => {
   const [eventDetailModalOpen, setEventDetailModalOpen] =
     React.useState<boolean>(false);
 
@@ -289,7 +296,7 @@ const WeeklySchedule = ({ curWeeklyNum }: WeeklyScheduleProps) => {
             color: 'white',
             backgroundColor: theme => theme.palette.primary.main,
             width: '80px',
-            height: `${durationTime * 40}px`,
+            height: `${durationTime * 50}px`,
             borderRadius: '4px',
             padding: '2px 5px',
             whiteSpace: 'nowrap',
@@ -307,7 +314,7 @@ const WeeklySchedule = ({ curWeeklyNum }: WeeklyScheduleProps) => {
     <TableContainer
       sx={{
         paddingLeft: '20px',
-        maxHeight: '810px',
+        maxHeight: '850px',
         overflowY: eventDetailModalOpen ? 'hidden' : 'scroll',
       }}
     >
@@ -342,14 +349,23 @@ const WeeklySchedule = ({ curWeeklyNum }: WeeklyScheduleProps) => {
                       sx={{
                         marginTop: '10px',
                         fontSize: '20px',
-                        color: new Date().getDay() - 1 === idx ? 'white' : '',
+                        color:
+                          moment().format('YYYY-MM-DD') ===
+                          moment()
+                            .day(idx + curWeeklyNum)
+                            .format('YYYY-MM-DD')
+                            ? 'white'
+                            : '',
                       }}
                     >
                       {moment()
-                        .day(idx + 1 + curWeeklyNum)
+                        .day(idx + curWeeklyNum)
                         .format('DD')}
                     </Typography>
-                    {new Date().getDay() - 1 === idx && <TodayCircle />}
+                    {moment().format('YYYY-MM-DD') ===
+                      moment()
+                        .day(idx + curWeeklyNum)
+                        .format('YYYY-MM-DD') && <TodayCircle />}
                   </Box>
                 </HeaderTableCell>
               );
@@ -363,18 +379,18 @@ const WeeklySchedule = ({ curWeeklyNum }: WeeklyScheduleProps) => {
                 {week.map((day, i) => {
                   const eventsForDay =
                     i === 0
-                      ? monEvents
+                      ? sunEvents
                       : i === 1
-                        ? tueEvents
+                        ? monEvents
                         : i === 2
-                          ? wedEvents
+                          ? tueEvents
                           : i === 3
-                            ? thuEvents
+                            ? wedEvents
                             : i === 4
-                              ? friEvents
+                              ? thuEvents
                               : i === 5
-                                ? satEvents
-                                : sunEvents;
+                                ? friEvents
+                                : satEvents;
 
                   return (
                     <EventCell

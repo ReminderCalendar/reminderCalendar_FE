@@ -31,6 +31,7 @@ const Schedule = () => {
   const searchTerm = useRecoilValue(searchTermAtom);
   const [today, setToday] = React.useState(new Date());
   const [prevOrNextNum, setPrevOrNextNum] = React.useState<number>(0);
+  const [addEventDialogOpen, setAddEventDialogOpen] = React.useState(false);
 
   const onChangeToday = () => {
     setToday(today);
@@ -40,7 +41,10 @@ const Schedule = () => {
     <Stack marginTop="75px" display="flex" flexDirection="row">
       <Stack margin="0 20px 0 10px">
         <ButtonBox>
-          <AddScheduleBtn size="large">
+          <AddScheduleBtn
+            size="large"
+            onClick={() => setAddEventDialogOpen(true)}
+          >
             <AddIcon sx={{ color: '#e5384f', marginRight: '10px' }} />
             <Typography color="black">일정 추가</Typography>
           </AddScheduleBtn>
@@ -60,10 +64,18 @@ const Schedule = () => {
           </ButtonGroup>
         </ButtonBox>
 
-        <StyledCalendar onChange={onChangeToday} value={today} />
+        <StyledCalendar
+          calendarType="gregory"
+          onChange={onChangeToday}
+          value={today}
+        />
       </Stack>
       {searchTerm === '' ? (
-        <WeeklySchedule curWeeklyNum={prevOrNextNum} />
+        <WeeklySchedule
+          curWeeklyNum={prevOrNextNum}
+          addEventDialogOpen={addEventDialogOpen}
+          setAddEventDialogOpen={setAddEventDialogOpen}
+        />
       ) : (
         <ScheduleList />
       )}
