@@ -6,6 +6,7 @@ import {
   Typography,
   Button,
   IconButton,
+  ButtonGroup,
 } from '@mui/material';
 import ReminderLogo from '../../assets/reminder.png';
 import { useRecoilState } from 'recoil';
@@ -22,16 +23,21 @@ const NavBar = () => {
       sx={{
         flex: 'start-end',
         backgroundColor: '#ffffff',
-        zIndex: -1,
       }}
     >
       <Toolbar>
-        <IconButton>
-          <img src={ReminderLogo} alt="Reminder Logo" width="28px" />
-        </IconButton>
-        <Typography color="primary.dark" fontWeight="500" fontSize="large">
-          ReminderCalendar
-        </Typography>
+        <ButtonGroup
+          onClick={() => navigate('/')}
+          sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
+        >
+          <IconButton>
+            <img src={ReminderLogo} alt="Reminder Logo" width="28px" />
+          </IconButton>
+          <Typography color="primary.dark" fontWeight="500" fontSize="large">
+            ReminderCalendar
+          </Typography>
+        </ButtonGroup>
+
         <Box sx={{ marginLeft: 'auto' }}>
           <SearchBar />
           {localStorage.getItem('accessToken') !== null ? (
@@ -53,7 +59,14 @@ const NavBar = () => {
             </Button>
           )}
 
-          <Button sx={{ color: 'black' }}>My</Button>
+          <Button
+            onClick={() => {
+              navigate('/diary');
+            }}
+            sx={{ color: 'black' }}
+          >
+            Diary
+          </Button>
         </Box>
       </Toolbar>
     </AppBar>
