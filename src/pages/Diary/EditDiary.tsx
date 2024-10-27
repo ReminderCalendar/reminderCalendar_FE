@@ -69,7 +69,7 @@ const EditDiary = ({
       setIsWrite(false);
     }
 
-    setDiaryDetail(prev => ({ title: '', content: '' }));
+    setDiaryDetail({ title: '', content: '' });
     setDate(dayjs());
   };
 
