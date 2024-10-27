@@ -50,7 +50,7 @@ const Diary = () => {
   const handleAddDiary = (diary: Diary) => {
     setAllDiary(prev => [...prev, diary]);
   };
-  console.log(isWrite);
+
   return (
     <Stack marginTop="95px" display="flex" flexDirection="row">
       <Stack>

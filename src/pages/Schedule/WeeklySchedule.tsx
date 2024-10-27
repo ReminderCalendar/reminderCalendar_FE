@@ -112,12 +112,13 @@ const WeeklySchedule = ({
 
   React.useEffect(() => {
     const getAllEvents = async () => {
-      for (let i = 1 + curWeeklyNum; i < 8 + curWeeklyNum; i++) {
+      for (let i = 0 + curWeeklyNum; i < 7 + curWeeklyNum; i++) {
         try {
           const year = moment().day(i).format('YYYY');
           const month = moment().day(i).format('MM');
-          const day = moment().day(i).format('DD');
+          const day = Number(moment().day(i).format('DD'));
           const dayoftheweek = moment().day(i).day();
+          console.log(moment().day(i).day());
           const { data } = await Reminder.get(
             `/events?datePrefix=${year}-${month}-${day}`,
           );
