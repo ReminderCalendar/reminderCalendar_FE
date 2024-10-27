@@ -4,7 +4,8 @@
     "typeRoots": ["./node_modules/@types", "./src/types"],
     "lib": ["ES2015", "DOM"],
     "module": "ESNext",
-    "moduleResolution": "Node"
+    "moduleResolution": "Node",
+    "esModuleInterop": true
   },
   "include": ["src/**/*.ts", "src/vite-env.d.ts"]
 }

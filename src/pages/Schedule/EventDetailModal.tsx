@@ -10,6 +10,8 @@ import {
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import DeleteIcon from '@mui/icons-material/Delete';
+import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
+import NotificationsOffIcon from '@mui/icons-material/NotificationsOff';
 import EditIcon from '@mui/icons-material/Edit';
 import { Schedule } from './WeeklySchedule';
 
@@ -91,7 +93,34 @@ const EventDetailModal = ({
           {event.eventDate.substring(5, 7)}월 {event.eventDate.substring(8, 10)}
           일 · {event.startTime} - {event.endTime}
         </Typography>
-        <Typography marginTop="20px">{event.content}</Typography>
+        <Box
+          display="flex"
+          flexDirection="row"
+          marginTop="4px"
+          alignItems="center"
+        >
+          {event.notificationType === 'NONE' ? (
+            <NotificationsOffIcon sx={{ fontSize: '17px', color: 'red' }} />
+          ) : (
+            <NotificationsActiveIcon
+              sx={{ fontSize: '18px', color: 'orange' }}
+            />
+          )}
+          <Typography fontSize="13px" color="gray" marginLeft="3px">
+            {event.notificationType === 'NONE'
+              ? '알림 없음'
+              : event.notificationTime === 'FIVE_MIN_BEFORE'
+                ? '5분 전'
+                : event.notificationTime === 'ONE_HOUR_BEFORE'
+                  ? '1시간 전'
+                  : event.notificationTime === 'ONE_DAY_BEFORE'
+                    ? '1일 전'
+                    : '일정 시작 시'}
+          </Typography>
+        </Box>
+        <Typography marginTop="20px" fontSize="15px">
+          {event.content}
+        </Typography>
         {moreEventDetail && (
           <>
             <Divider sx={{ marginTop: '20px', marginBottom: '15px' }} />
