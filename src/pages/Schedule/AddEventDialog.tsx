@@ -13,9 +13,10 @@ import {
   Button,
   Box,
   Tooltip,
+  Select,
+  MenuItem,
+  styled,
 } from '@mui/material';
-// import { Select, Option } from '@mui/joy';
-// import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown';
 import CloseIcon from '@mui/icons-material/Close';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import dayjs, { Dayjs } from 'dayjs';
@@ -28,6 +29,8 @@ import {
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import EventAPI from '../../api/EventAPI';
 import { Schedule } from './WeeklySchedule';
+import ReminderAPI from '../../api/api';
+import DaumPostcode from 'react-daum-postcode';
 
 type Event = { title: string; content: string; review: string };
 interface AddEventDialogProps {
@@ -50,6 +53,26 @@ const emoji = [
   ['🚫', '없음', ''],
 ];
 
+const VisuallyHiddenInput = styled('input')({
+  clip: 'rect(0 0 0 0)',
+  clipPath: 'inset(50%)',
+  height: 1,
+  overflow: 'hidden',
+  position: 'absolute',
+  bottom: 0,
+  left: 0,
+  whiteSpace: 'nowrap',
+  width: 1,
+});
+
+const DetailAddressInput = styled('input')({
+  border: '1px solid lightgray',
+  borderRadius: '5px',
+  width: '400px',
+  height: '35px',
+  margin: '8px 0 20px 43px',
+});
+
 const AddEventDialog = ({
   addEventDialogOpen,
   setAddEventDialogOpen,
@@ -58,6 +81,7 @@ const AddEventDialog = ({
   eventToEdit,
   setEventToEdit,
 }: AddEventDialogProps) => {
+  const [isUploading, setIsUploading] = useState<boolean>(false);
   const [isAlldayChecked, setAlldayChecked] = useState<boolean>(false);
   const [selectedDate, setSelectedDate] = useState<Dayjs | null>(
     eventToEdit?.eventDate ? dayjs(eventToEdit.eventDate) : null,
@@ -72,10 +96,60 @@ const AddEventDialog = ({
   const [reviewFaceName, setReviewFaceName] = useState<string>(
     eventToEdit?.emotion || '',
   );
-  const [address, setAddress] = useState<string>('');
+  const [notificationTime, setNotificationTime] = useState('NONE');
   const [isFull, setIsFull] = useState<boolean>(false);
+  const [fileUrl, setFileUrl] = useState<string>('');
+  const [fileID, setFileID] = useState('');
+  const [isDaumAddressOpen, setDaumAddressOpen] = useState(false);
+  const [zonecode, setZonecode] = useState('');
+  const [address, setAddress] = useState<string>('');
+  const [detailedAddress, setDetailedAddress] = useState('');
+
+  const completeHandler = data => {
+    const { address, zonecode } = data;
+    setZonecode(zonecode);
+    setAddress(address);
+  };
+
+  const handleClickCloseButton = async () => {
+    setAddEventDialogOpen(false);
+    try {
+      await ReminderAPI.delete(`/files/${fileID}`);
+    } catch (err) {
+      console.error(err);
+    }
+    setFileID('');
+    setFileUrl('');
+  };
+
+  const handleFileUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setIsUploading(true);
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const { data } = await EventAPI.post('/files', formData);
+      console.log('File uploaded successfully:', data);
+      setFileUrl(data.fileUrl);
+      setFileID(data.id);
+    } catch (error) {
+      console.error('File upload failed:', error);
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   const handleSave = async () => {
+    if (isUploading) {
+      window.alert('파일 업로드 중에는 저장할 수 없습니다.');
+      return;
+    }
+
     if (eventToEdit) {
       //일정 수정 모드일떄
       const editData = new FormData();
@@ -99,12 +173,25 @@ const AddEventDialog = ({
       if (reviewFaceName !== '' && reviewFaceName !== eventToEdit.emotion)
         editData.append('emotion', reviewFaceName);
       //시간 default dayjs 형식으로 안되는문제 해결
+      if (
+        notificationTime !== 'NONE' &&
+        notificationTime !== eventToEdit.notificationTime
+      ) {
+        editData.append('notificationTime', notificationTime);
+      }
+      if (fileUrl) {
+        editData.append('file', fileUrl);
+      }
+
+      const obj = {};
+      editData.forEach((val, key) => (obj[key] = val));
 
       try {
-        const { data } = await EventAPI.patch(
+        const { data } = await ReminderAPI.patch(
           `/events/${eventToEdit.id}`,
-          editData,
+          obj,
         );
+
         setEventToEdit(data);
         onAddOrEditEvent(data);
 
@@ -116,6 +203,8 @@ const AddEventDialog = ({
         setEventDetail({ title: '', content: '', review: '' });
         setReviewFaceName('');
         setIsFull(false);
+        setFileID('');
+        setFileUrl('');
       } catch (err) {
         console.error('Error:', err.response?.data || err.message);
       }
@@ -151,12 +240,23 @@ const AddEventDialog = ({
           return;
         }
       }
+      if (notificationTime === 'NONE') {
+        formData.append('notificationType', 'NONE');
+        formData.append('notificationTime', 'ON_TIME');
+      } else {
+        formData.append('notificationType', 'GENERAL');
+        formData.append('notificationTime', notificationTime);
+      }
+      if (fileUrl) {
+        formData.append('file', fileUrl);
+      }
       formData.append('repeatType', 'NONE');
-      formData.append('notificationType', 'NONE');
-      formData.append('notificationTime', 'ON_TIME');
+
+      const obj = {};
+      formData.forEach((val, key) => (obj[key] = val));
 
       try {
-        const { data } = await EventAPI.post('/events', formData);
+        const { data } = await ReminderAPI.post('/events', obj);
         onAddOrEditEvent(data);
 
         setAddEventDialogOpen(false);
@@ -167,6 +267,8 @@ const AddEventDialog = ({
         setEventDetail({ title: '', content: '', review: '' });
         setReviewFaceName('');
         setIsFull(false);
+        setFileID('');
+        setFileUrl('');
       } catch (err) {
         console.error('Error:', err.response?.data || err.message);
       }
@@ -190,15 +292,12 @@ const AddEventDialog = ({
       maxWidth={isFull ? 'sm' : 'xs'}
       fullWidth
     >
-      <IconButton
-        sx={{ marginLeft: 'auto' }}
-        onClick={() => setAddEventDialogOpen(false)}
-      >
+      <IconButton sx={{ marginLeft: 'auto' }} onClick={handleClickCloseButton}>
         <CloseIcon />
       </IconButton>
       <DialogContent sx={{ display: 'flex', flexDirection: 'column' }}>
         <Input
-          placeholder="제목 추가"
+          placeholder="제목 입력"
           value={eventDeatil.title}
           onChange={e =>
             setEventDetail(prev => ({ ...prev, title: e.target.value }))
@@ -276,29 +375,74 @@ const AddEventDialog = ({
         </LocalizationProvider>
         {isFull && (
           <>
-            <Stack marginBottom="20px">
-              <Typography marginRight="10px">알림:</Typography>
-              {/* <Select placeholder="이메일 알림 시간 설정">
-                <Option value="dog">Dog</Option>
-                <Option value="cat">Cat</Option>
-                <Option value="fish">Fish</Option>
-                <Option value="bird">Bird</Option>
-              </Select> */}
+            <Stack
+              marginBottom="15px"
+              sx={{
+                display: 'flex',
+                flexDirection: 'row',
+                alignItems: 'center',
+              }}
+            >
+              <Typography marginRight="10px">이메일 알림:</Typography>
+              <Select
+                label="알림 설정 시간"
+                value={notificationTime}
+                onChange={e => setNotificationTime(e.target.value)}
+                sx={{ width: '150px', height: '35px' }}
+              >
+                <MenuItem value="NONE">알림 받지 않음</MenuItem>
+                <MenuItem value="FIVE_MIN_BEFORE">5분전</MenuItem>
+                <MenuItem value="ONE_HOUR_BEFORE">1시간전</MenuItem>
+                <MenuItem value="ONE_DAY_BEFORE">1일전</MenuItem>
+                <MenuItem>일정 시작 시</MenuItem>
+              </Select>
             </Stack>
-            <Stack marginBottom="20px" display="flex" flexDirection="row">
+            <Stack
+              marginBottom="8px"
+              display="flex"
+              flexDirection="row"
+              alignItems="center"
+            >
               <Typography marginRight="10px">주소:</Typography>
-              <Input
-                value={address}
-                onChange={e => setAddress(e.target.value)}
-                sx={{ width: '330px' }}
-              />
+              <Box
+                sx={{
+                  border: '1px solid lightgray',
+                  borderRadius: '5px',
+                  width: '100px',
+                  height: '35px',
+                  marginRight: '10px',
+                }}
+              >
+                {zonecode}
+              </Box>
+              <Button
+                onClick={() => setDaumAddressOpen(prev => !prev)}
+                sx={{ boxShadow: '1px 1px 5px 0px rgba(0,0,0,0.2)' }}
+              >
+                주소 찾기
+              </Button>
             </Stack>
+            {isDaumAddressOpen && <DaumPostcode onComplete={completeHandler} />}
+            <Box
+              sx={{
+                border: '1px solid lightgray',
+                borderRadius: '5px',
+                width: '400px',
+                height: '35px',
+                marginLeft: '43px',
+              }}
+            >
+              {address}
+            </Box>
+            <DetailAddressInput
+              value={detailedAddress}
+              onChange={e => setDetailedAddress(e.target.value)}
+            />
           </>
         )}
         <TextField
-          id="standard-textarea"
-          label="내용 추가"
-          placeholder="Placeholder"
+          id="event-contents"
+          placeholder="내용 입력"
           multiline
           rows={4}
           variant="outlined"
@@ -320,12 +464,10 @@ const AddEventDialog = ({
             fontSize: '12px',
             marginY: '10px',
           }}
+          disabled={isUploading}
         >
-          Upload files
-          {/*<input
-                type="file"
-                onChange={event => console.log(event.target.files)}
-              />*/}
+          {isUploading ? 'Uploading...' : 'Upload files'}
+          <VisuallyHiddenInput type="file" onChange={handleFileUpload} />
         </Button>
         {isFull ? (
           <Box>
@@ -397,7 +539,7 @@ const AddEventDialog = ({
         <Button onClick={() => setIsFull(!isFull)}>
           {isFull ? '옵션 숨기기' : '옵션 더보기'}
         </Button>
-        <Button variant="contained" onClick={handleSave}>
+        <Button variant="contained" onClick={handleSave} disabled={isUploading}>
           {isEditMode ? '수정' : '저장'}
         </Button>
       </DialogActions>
