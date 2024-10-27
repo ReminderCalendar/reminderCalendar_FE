@@ -20,6 +20,7 @@ const ReminderAPI = {
   get: (url: string) => instance.get(url),
   post: (url: string, data: object, config?: AxiosRequestConfig) =>
     instance.post(url, data, config),
+  patch: (url: string, data?: object) => instance.patch(url, data),
   delete: (url: string) => instance.delete(url),
 };
 
