@@ -10,6 +10,7 @@ import EventIcon from '@mui/icons-material/Event';
 import { Schedule } from '../WeeklySchedule';
 import EventDetailModal from '../EventDetailModal';
 import AddEventDialog from '../AddEventDialog';
+import useDebounce from '../../../hooks/useDebounce';
 
 const ScheduleList = () => {
   const [addEventDialogOpen, setAddEventDialogOpen] = React.useState(false);
@@ -28,14 +29,17 @@ const ScheduleList = () => {
     top: number;
     left: number;
   } | null>(null);
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
   React.useEffect(() => {
     const getEventList = async () => {
-      const { data } = await Reminder.get(`/events?query=${searchTerm}`);
+      const { data } = await Reminder.get(
+        `/events?query=${debouncedSearchTerm}`,
+      );
       setSearchtermEventList(data);
     };
     getEventList();
-  }, [searchTerm]);
+  }, [debouncedSearchTerm]);
 
   const handleListItemClick = async (
     event: Schedule,
@@ -151,7 +155,7 @@ const ScheduleList = () => {
               modalPosition && (
                 <EventDetailModal
                   setEventDetailModalOpen={setEventDetailModalOpen}
-                  event={event}
+                  event={selectedEvent}
                   position={modalPosition}
                   onDeleteEvent={handleDeleteEvent}
                   onEditMode={handleEditModeOn}
