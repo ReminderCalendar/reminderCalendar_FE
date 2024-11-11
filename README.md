@@ -2,9 +2,9 @@
 
 > **일정 및 일기를 작성하는 스케쥴러 기능과 일정에 대한 이메일 알람을 받을 수 있는 서비스입니다.**
 
-## 배포링크
+<!-- ## 배포링크
 
-[🔗Click!](http://remindercalendar.s3-website.ap-northeast-2.amazonaws.com)
+[🔗Click!](http://remindercalendar.s3-website.ap-northeast-2.amazonaws.com) -->
 
 ## 주요기능
 
