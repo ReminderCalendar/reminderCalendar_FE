@@ -45,7 +45,7 @@ const NavBar = () => {
               sx={{ color: 'black', fontWeight: 'bold' }}
               onClick={() => {
                 localStorage.clear();
-                navigate('/');
+                window.location.replace('/');
               }}
             >
               로그아웃
