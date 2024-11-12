@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import Reminder from '../../api/api';
 import {
   Dialog,
@@ -7,14 +8,12 @@ import {
   DialogContentText,
   DialogActions,
   Button,
-  Box,
   TextField,
   Typography,
   InputAdornment,
 } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
-import { AccountBox, Email } from '@mui/icons-material';
-import { isEmailValid } from '../../util/validation';
+import { AccountBox } from '@mui/icons-material';
+import EmailVerification from './components/EmailVerification';
 
 const Redirection = () => {
   const navigate = useNavigate();
@@ -26,12 +25,13 @@ const Redirection = () => {
     const isMember = async () => {
       try {
         const { data } = await Reminder.get('/member');
-        localStorage.setItem('active', 'true');
-        console.log(data);
+        localStorage.setItem('active', data.active);
         navigate('/');
       } catch (err) {
-        localStorage.setItem('active', 'false');
-        setNickNameModalOpen(true);
+        if (err.response.data.message === '회원이 활성화되어 있지 않습니다.') {
+          localStorage.setItem('active', 'false');
+          setNickNameModalOpen(true);
+        }
       }
     };
 
@@ -49,18 +49,6 @@ const Redirection = () => {
       try {
         const { data } = await Reminder.get(`/login/google?code=${code}`);
         localStorage.setItem('accessToken', data.accessToken);
-        console.log(data);
-        isMember();
-      } catch (err) {
-        console.error(err);
-      }
-    };
-
-    const naverLogin = async () => {
-      try {
-        const { data } = await Reminder.get(`/login/naver?code=${code}`);
-        localStorage.setItem('accessToken', data.accessToken);
-        console.log(data);
         isMember();
       } catch (err) {
         console.error(err);
@@ -71,65 +59,17 @@ const Redirection = () => {
       kakaoLogin();
     } else if (window.location.href.includes('google')) {
       googleLogin();
-    } else if (window.location.href.includes('naver')) {
-      naverLogin();
     }
   }, [code, navigate]);
-
-  // const LoginProgress = () => {
-  //   return (
-  //     <Dialog open={true} maxWidth="xs" fullWidth>
-  //       <DialogContent
-  //         sx={{
-  //           display: 'flex',
-  //           flexDirection: 'column',
-  //           alignItems: 'center',
-  //           padding: '3rem 0',
-  //         }}
-  //       >
-  //         <CircularProgress
-  //           sx={{ color: theme => theme.palette.primary.dark }}
-  //         />
-  //         <Typography marginTop="1.5rem">로그인 중입니다.</Typography>
-  //       </DialogContent>
-  //     </Dialog>
-  //   );
-  // };
 
   const AddMemberInfo = () => {
     const [email, setEmail] = React.useState('');
     const [nickname, setNickname] = React.useState('');
     const [verificationNum, setVerificationNum] = React.useState('');
-    const [isEmailsend, setEmailsend] = React.useState(false);
-
-    const handleSendEmail = async () => {
-      if (isEmailValid(email)) {
-        setEmailsend(true);
-        try {
-          await Reminder.post('/email/code', { email });
-        } catch (err) {
-          window.alert('이메일 발송에 실패했습니다.');
-        }
-      }
-    };
 
     const handleClickCancel = () => {
       setNickNameModalOpen(false);
       navigate('/');
-    };
-    
-    const handleCheckCorrect = async () => {
-      if (verificationNum === '') {
-        window.alert('인증번호를 입력해주세요.');
-        return;
-      }
-      try {
-        await Reminder.get(`/email/verify?verificationCode=${verificationNum}`);
-        window.alert('인증번호가 일치합니다! 회원가입을 진행해주세요:)');
-        setEmailsend(false);
-      } catch (err) {
-        window.alert('인증번호가 일치하지 않습니다.');
-      }
     };
 
     const handleSubmit = async () => {
@@ -140,7 +80,7 @@ const Redirection = () => {
           verificationCode: verificationNum,
         });
         localStorage.setItem('active', 'true');
-        navigate('/');
+        window.location.replace('/');
       } catch (err) {
         window.alert('회원가입에 실패하였습니다. 다시 진행해주세요.');
       }
@@ -173,77 +113,12 @@ const Redirection = () => {
             value={nickname}
             onChange={e => setNickname(e.target.value)}
           />
-          <Typography marginTop="2rem">Email</Typography>
-          <Box
-            sx={{
-              display: 'flex',
-              justifyContent: 'space-between',
-            }}
-          >
-            <TextField
-              sx={{ width: '290px' }}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Email />
-                  </InputAdornment>
-                ),
-              }}
-              variant="standard"
-              placeholder="hgd@reminder.com"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-            />
-            <Button
-              type="submit"
-              sx={{
-                color: 'white',
-                backgroundColor: theme => theme.palette.primary.dark,
-                ':hover': { backgroundColor: 'primary.light' },
-              }}
-              onClick={handleSendEmail}
-            >
-              {isEmailsend ? '재전송' : '이메일 인증'}
-            </Button>
-          </Box>
-          {!isEmailValid(email) && email !== '' && (
-            <Typography variant="caption" color="error">
-              영문 소문자, 숫자와 특수기호(_),(-)만 사용 가능합니다.
-            </Typography>
-          )}
-          {isEmailsend && (
-            <>
-              <Typography className="authentication-code" marginTop="1rem">
-                인증코드
-              </Typography>
-              <Box
-                sx={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                }}
-              >
-                <TextField
-                  sx={{ width: '290px' }}
-                  variant="standard"
-                  value={verificationNum}
-                  onChange={e => setVerificationNum(e.target.value)}
-                />
-                {/* <Typography mx="0.7rem">2:50</Typography> */}
-                <Button
-                  type="submit"
-                  sx={{
-                    color: 'white',
-                    backgroundColor: theme => theme.palette.primary.dark,
-                    ':hover': { backgroundColor: 'primary.light' },
-                  }}
-                  onClick={handleCheckCorrect}
-                >
-                  확인
-                </Button>
-              </Box>
-            </>
-          )}
+          <EmailVerification
+            email={email}
+            setEmail={setEmail}
+            verificationNum={verificationNum}
+            setVerificationNum={setVerificationNum}
+          />
         </DialogContent>
         <DialogActions sx={{ padding: '1.5rem' }}>
           <Button
@@ -270,12 +145,7 @@ const Redirection = () => {
     );
   };
 
-  return (
-    <>
-      {/* {localStorage.getItem('active') === null && <LoginProgress />} */}
-      {nickNameModalOpen && <AddMemberInfo />}
-    </>
-  );
+  return <>{nickNameModalOpen && <AddMemberInfo />}</>;
 };
 
 export default Redirection;
