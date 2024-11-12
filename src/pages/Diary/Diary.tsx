@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { StyledCalendar } from '../Schedule/CalendarStyle';
 import {
   Button,
@@ -32,14 +33,22 @@ const Diary = () => {
   const [isWatch, setIsWatch] = React.useState<boolean>(false);
   const [selectedDiary, setSelectedDiary] = React.useState<Diary | null>(null);
   const [allDiary, setAllDiary] = React.useState<Diary[]>([]);
+  const navigate = useNavigate();
 
   React.useEffect(() => {
     const getAllDiary = async () => {
-      const { data } = await Reminder.get('/diaries');
-      setAllDiary(data);
+      try {
+        const { data } = await Reminder.get('/diaries');
+        setAllDiary(data);
+      } catch (err) {
+        if (err.response.data.message === '회원이 활성화되어 있지 않습니다.') {
+          window.alert('계정 활성화 후 이용 가능한 기능입니다 :)');
+          navigate('/');
+        }
+      }
     };
     getAllDiary();
-  }, []);
+  }, [navigate]);
 
   const handleEditDiary = (editDiary: Diary) => {
     setAllDiary(prev =>
