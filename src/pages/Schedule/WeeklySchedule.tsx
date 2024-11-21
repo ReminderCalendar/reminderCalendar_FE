@@ -37,16 +37,14 @@ const HeaderTableCell = styled(TableCell)({
   textAlign: 'center',
 });
 
-const TodayCircle = styled('div')({
+const DateCircle = styled('div')({
   width: '40px',
   height: '40px',
+  lineHeight: '40px',
   borderRadius: '50%',
-  backgroundColor: '#e5384f',
-
-  position: 'absolute',
-  top: '48%',
-  left: '41%',
-  zIndex: '-1',
+  fontSize: '22px',
+  fontWeight: '400',
+  marginTop: '10px',
 });
 
 const TimeCell = styled(Box)({
@@ -118,10 +116,11 @@ const WeeklySchedule = ({
           const month = moment().day(i).format('MM');
           const day = Number(moment().day(i).format('DD'));
           const dayoftheweek = moment().day(i).day();
-          console.log(moment().day(i).day());
+
           const { data } = await Reminder.get(
             `/events?datePrefix=${year}-${month}-${day}`,
           );
+
           if (dayoftheweek === 0) setSunEvents(data);
           if (dayoftheweek === 1) setMonEvents(data);
           if (dayoftheweek === 2) setTueEvents(data);
@@ -315,7 +314,7 @@ const WeeklySchedule = ({
     <TableContainer
       sx={{
         paddingLeft: '20px',
-        maxHeight: '850px',
+        maxHeight: '810px',
         overflowY: eventDetailModalOpen ? 'hidden' : 'scroll',
       }}
     >
@@ -344,29 +343,39 @@ const WeeklySchedule = ({
             {week.map((day, idx) => {
               return (
                 <HeaderTableCell key={day}>
-                  <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                    <Typography>{day}</Typography>
-                    <Typography
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                    }}
+                  >
+                    <Typography sx={{ color: '#616161', fontSize: '14px' }}>
+                      {day}
+                    </Typography>
+
+                    <DateCircle
                       sx={{
-                        marginTop: '10px',
-                        fontSize: '20px',
                         color:
                           moment().format('YYYY-MM-DD') ===
                           moment()
                             .day(idx + curWeeklyNum)
                             .format('YYYY-MM-DD')
                             ? 'white'
-                            : '',
+                            : '#616161',
+                        backgroundColor:
+                          moment().format('YYYY-MM-DD') ===
+                          moment()
+                            .day(idx + curWeeklyNum)
+                            .format('YYYY-MM-DD')
+                            ? '#e5384f'
+                            : 'white',
                       }}
                     >
                       {moment()
                         .day(idx + curWeeklyNum)
                         .format('DD')}
-                    </Typography>
-                    {moment().format('YYYY-MM-DD') ===
-                      moment()
-                        .day(idx + curWeeklyNum)
-                        .format('YYYY-MM-DD') && <TodayCircle />}
+                    </DateCircle>
                   </Box>
                 </HeaderTableCell>
               );
