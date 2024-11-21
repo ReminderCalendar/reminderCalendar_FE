@@ -2,7 +2,7 @@ import React from 'react';
 import { Box, Button, Card, Typography } from '@mui/material';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import { useRecoilState } from 'recoil';
-import { isModalOpenAtom } from '../../../recoil/login/loginModalAtoms';
+import { isModalOpenAtom } from '../../recoil/login/loginModalAtoms';
 
 const ActiveBox = () => {
   const [isModalOpen, setModalOpen] = useRecoilState<boolean>(isModalOpenAtom);
