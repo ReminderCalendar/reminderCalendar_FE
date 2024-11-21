@@ -1,22 +1,24 @@
 import React from 'react';
 import {
   AppBar,
-  Box,
   Toolbar,
   Typography,
   Button,
   IconButton,
   ButtonGroup,
 } from '@mui/material';
+import DateRangeIcon from '@mui/icons-material/DateRange';
 import ReminderLogo from '../../assets/reminder.png';
 import { useRecoilState } from 'recoil';
 import { isModalOpenAtom } from '../../recoil/login/loginModalAtoms';
-import { useNavigate } from 'react-router-dom';
-import SearchBar from './SearchBar';
+import { useNavigate, useLocation } from 'react-router-dom';
+import SearchBar from './components/SearchBar';
+import ViewButton from './components/ViewButton';
 
 const NavBar = () => {
   const [isModalOpen, setModalOpen] = useRecoilState<boolean>(isModalOpenAtom);
   const navigate = useNavigate();
+  const location = useLocation();
 
   return (
     <AppBar
@@ -38,36 +40,50 @@ const NavBar = () => {
           </Typography>
         </ButtonGroup>
 
-        <Box sx={{ marginLeft: 'auto' }}>
-          <SearchBar />
-          {localStorage.getItem('accessToken') !== null ? (
+        {location.pathname.includes('calendar') && (
+          <>
+            <SearchBar />
+            <ViewButton />
             <Button
-              sx={{ color: 'black', fontWeight: 'bold' }}
               onClick={() => {
-                localStorage.clear();
-                window.location.replace('/');
+                navigate('/diary');
               }}
+              sx={{ fontSize: '15px' }}
             >
-              로그아웃
+              Diary
             </Button>
-          ) : (
-            <Button
-              sx={{ color: 'black' }}
-              onClick={() => setModalOpen(!isModalOpen)}
-            >
-              회원가입/로그인
-            </Button>
-          )}
+          </>
+        )}
 
+        {location.pathname.includes('diary') && (
           <Button
-            onClick={() => {
-              navigate('/diary');
-            }}
-            sx={{ color: 'black' }}
+            startIcon={<DateRangeIcon />}
+            onClick={() => navigate('/calendar')}
+            variant="outlined"
+            sx={{ margin: '0 15px 0 auto' }}
           >
-            Diary
+            Calendar
           </Button>
-        </Box>
+        )}
+
+        {localStorage.getItem('accessToken') !== null ? (
+          <Button
+            sx={{ color: 'black', fontWeight: 'bold' }}
+            onClick={() => {
+              localStorage.clear();
+              window.location.replace('/');
+            }}
+          >
+            로그아웃
+          </Button>
+        ) : (
+          <Button
+            sx={{ color: 'black' }}
+            onClick={() => setModalOpen(!isModalOpen)}
+          >
+            회원가입/로그인
+          </Button>
+        )}
       </Toolbar>
     </AppBar>
   );
