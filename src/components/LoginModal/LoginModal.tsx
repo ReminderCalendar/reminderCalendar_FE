@@ -1,6 +1,5 @@
 import React from 'react';
 import GoogleLogo from '../../assets/google_logo.png';
-//import NaverLogo from '../../assets/naver_logo.png';
 import ReminderCalendarLogo from '../../assets/reminder.png';
 import CloseIcon from '@mui/icons-material/Close';
 import {
@@ -24,7 +23,7 @@ const LoginModal = () => {
 
   return (
     <Dialog
-      open={true}
+      open={isModalOpen}
       fullWidth
       maxWidth="xs"
       sx={{ '& .MuiDialog-paper': { borderRadius: '1rem' } }}
@@ -81,11 +80,6 @@ const LoginModal = () => {
           <Link href={KAKAO_AUTH_URL}>
             <BtnBox className="kakao_login_btn" />
           </Link>
-          {/* <Link href={NAVER_AUTH_URL}>
-            <BtnBox className="google_login_btn">
-              <img src={NaverLogo} height="22px" />
-            </BtnBox>
-          </Link> */}
           <Link href={GOOGLE_AUTH_URL} underline="none">
             <BtnBox className="google_login_btn">
               <Avatar

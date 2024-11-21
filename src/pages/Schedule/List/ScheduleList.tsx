@@ -95,7 +95,7 @@ const ScheduleList = () => {
     <List
       sx={{
         width: '100%',
-        height: '810px',
+        height: '798px',
         overflowY: 'scroll',
 
         borderLeft: '1px solid lightgray',
