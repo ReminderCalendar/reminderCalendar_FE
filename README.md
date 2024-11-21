@@ -19,12 +19,12 @@ npm start
  
 ## 💻 페이지별 화면
 
-|                                                                                                                  |                                                                                                                     |
-| ---------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-|<img width="1280" alt="image" src="https://github.com/user-attachments/assets/5489ed0e-43ef-46a4-b285-a5cf674a8512">|<img width="1268" alt="image" src="https://github.com/user-attachments/assets/80ac2580-1937-4025-9b65-3402a884bb18">|
-| 회원가입/로그인 모달창                                                                                             | 캘린더                                                                                                              |
-|<img width="1262" alt="image" src="https://github.com/user-attachments/assets/d87a12c2-66c3-4f32-8239-6bc6be6b7a75">|<img width="1280" alt="image" src="https://github.com/user-attachments/assets/7d9f2f42-6ee5-45fc-878f-d96fef842781">|
-| 검색어에 따른 일정 리스트 형식                                                                                      | 일기작성 페이지                                                                                                       |
+|                                                                                                                      |                                                                                                                      |
+| -------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| <img width="1280" alt="image" src="https://github.com/user-attachments/assets/5489ed0e-43ef-46a4-b285-a5cf674a8512"> | <img width="1268" alt="image" src="https://github.com/user-attachments/assets/80ac2580-1937-4025-9b65-3402a884bb18"> |
+| 회원가입/로그인 모달창                                                                                               | 캘린더                                                                                                               |
+| <img width="1262" alt="image" src="https://github.com/user-attachments/assets/d87a12c2-66c3-4f32-8239-6bc6be6b7a75"> | <img width="1280" alt="image" src="https://github.com/user-attachments/assets/7d9f2f42-6ee5-45fc-878f-d96fef842781"> |
+| 검색어에 따른 일정 리스트 형식                                                                                       | 일기작성 페이지                                                                                                      |
 
 <br />
 
@@ -72,4 +72,3 @@ npm start
 | ------ | ------------ |
 | 장은영 | `프론트엔드` |
 | 이재성 | `백엔드`     |
-
