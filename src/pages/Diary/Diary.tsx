@@ -1,149 +1,52 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { StyledCalendar } from '../Schedule/CalendarStyle';
-import {
-  Button,
-  IconButton,
-  Box,
-  Stack,
-  Typography,
-  styled,
-} from '@mui/material';
+import { Outlet, useNavigate } from 'react-router-dom';
+import { StyledCalendar } from '../../components/Calendar/CalendarStyle';
+import { Button, Stack, styled, Typography } from '@mui/material';
 import CreateIcon from '@mui/icons-material/Create';
-import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
-import DiaryList from './DiaryList';
-import EditDiary from './EditDiary';
-import Reminder from '../../api/api';
 
-export interface Diary {
-  id: number;
-  title: string;
-  content: string;
-  date: string;
-}
+type DatePiece = Date | null;
+type ClickedDate = DatePiece | [DatePiece, DatePiece];
 
-const CustomStyledCalendar = styled(StyledCalendar)({
-  marginTop: '70px',
-  marginLeft: '10px',
+const DiaryContainer = styled(Stack)({
+  margin: '75px 10px 0 10px',
+  display: 'flex',
+  flexDirection: 'row',
+});
+
+const WriteDiaryButton = styled(Button)({
+  width: '200px',
+  height: '45px',
+
+  margin: '10px 0',
+
+  fontWeight: 'bold',
+  color: 'black',
+  boxShadow: '2px 2px 5px 1px rgba(0,0,0,0.2)',
 });
 
 const Diary = () => {
-  const [isWrite, setIsWrite] = React.useState<boolean>(false);
-  const [isEdit, setIsEdit] = React.useState<boolean>(false);
-  const [isWatch, setIsWatch] = React.useState<boolean>(false);
-  const [selectedDiary, setSelectedDiary] = React.useState<Diary | null>(null);
-  const [allDiary, setAllDiary] = React.useState<Diary[]>([]);
+  const [clickDay, setClickDay] = React.useState<ClickedDate>(new Date());
+
   const navigate = useNavigate();
 
-  React.useEffect(() => {
-    const getAllDiary = async () => {
-      try {
-        const { data } = await Reminder.get('/diaries');
-        setAllDiary(data);
-      } catch (err) {
-        if (err.response.data.message === '회원이 활성화되어 있지 않습니다.') {
-          window.alert('계정 활성화 후 이용 가능한 기능입니다 :)');
-          navigate('/');
-        }
-      }
-    };
-    getAllDiary();
-  }, [navigate]);
-
-  const handleEditDiary = (editDiary: Diary) => {
-    setAllDiary(prev =>
-      prev.map(diary => (diary === selectedDiary ? editDiary : diary)),
-    );
-  };
-
-  const handleAddDiary = (diary: Diary) => {
-    setAllDiary(prev => [...prev, diary]);
-  };
-
   return (
-    <Stack marginTop="95px" display="flex" flexDirection="row">
+    <DiaryContainer>
       <Stack>
-        <CustomStyledCalendar calendarType="gregory" />
+        <WriteDiaryButton onClick={() => navigate('/diary/write')}>
+          <CreateIcon sx={{ color: '#e5384f', marginRight: '10px' }} />
+          <Typography>일기 작성</Typography>
+        </WriteDiaryButton>
+        <StyledCalendar
+          calendarType="gregory"
+          onChange={setClickDay}
+          value={clickDay}
+        />
       </Stack>
 
-      <Stack>
-        <Box
-          display="flex"
-          alignItems="center"
-          sx={{
-            width: '100%',
-            marginBottom: '15px',
-          }}
-        >
-          {isWatch && (
-            <IconButton
-              onClick={() => {
-                setIsEdit(true);
-                setIsWatch(false);
-              }}
-              sx={{
-                left: '1210px',
-                color: theme => theme.palette.primary.dark,
-                boxShadow: '2px 2px 5px 1px rgba(0,0,0,0.2)',
-              }}
-            >
-              <CreateIcon />
-            </IconButton>
-          )}
-          <Button
-            onClick={() => {
-              if (isWrite) {
-                setIsWrite(false);
-              } else if (isWatch) {
-                setIsWatch(false);
-              } else if (isEdit) {
-                setIsEdit(false);
-              } else {
-                setIsWrite(true);
-              }
-            }}
-            sx={{
-              marginLeft: 'auto',
-              marginRight: '15px',
-              width: '240px',
-              height: '40px',
-              boxShadow: '2px 2px 5px 1px rgba(0,0,0,0.2)',
-            }}
-            size="large"
-          >
-            {isWrite || isEdit || isWatch ? (
-              <FormatListBulletedIcon
-                sx={{ color: '#e5384f', marginRight: '10px' }}
-              />
-            ) : (
-              <CreateIcon sx={{ color: '#e5384f', marginRight: '10px' }} />
-            )}
-            <Typography sx={{ color: 'black', fontWeight: '500' }}>
-              {isWatch || isEdit || isWrite ? '목록으로' : '일기 작성'}
-            </Typography>
-          </Button>
-        </Box>
-
-        {isWrite || isEdit || isWatch ? (
-          <EditDiary
-            isWatch={isWatch}
-            isEdit={isEdit}
-            handleAddDiary={handleAddDiary}
-            selectedDiary={selectedDiary}
-            setIsEdit={setIsEdit}
-            setIsWrite={setIsWrite}
-            handleEditDiary={handleEditDiary}
-          />
-        ) : (
-          <DiaryList
-            allDiary={allDiary}
-            setIsWatch={setIsWatch}
-            setSelectedDiary={setSelectedDiary}
-            setAllDiary={setAllDiary}
-          />
-        )}
+      <Stack sx={{ width: '100%', height: '100%', marginLeft: '22px' }}>
+        <Outlet />
       </Stack>
-    </Stack>
+    </DiaryContainer>
   );
 };
 
