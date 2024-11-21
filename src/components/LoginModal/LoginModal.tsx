@@ -23,7 +23,7 @@ const LoginModal = () => {
 
   return (
     <Dialog
-      open={true}
+      open={isModalOpen}
       fullWidth
       maxWidth="xs"
       sx={{ '& .MuiDialog-paper': { borderRadius: '1rem' } }}
